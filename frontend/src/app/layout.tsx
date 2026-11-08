@@ -5,8 +5,12 @@ export const metadata: Metadata = {
   title: "LahanSense - Intelijen Irigasi Tanpa Sensor",
   description: "Intelijen irigasi tanpa sensor: NDVI Sentinel-2 + FAO-56",
   icons: {
-    icon: "/logo.png",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo.png", type: "image/png" },
+    ],
     apple: "/logo.png",
+    shortcut: "/logo.png",
   },
 };
 
@@ -18,6 +22,9 @@ export default function RootLayout({
   return (
     <html lang="id" className="h-full antialiased font-sans">
       <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
