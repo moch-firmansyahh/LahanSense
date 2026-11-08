@@ -1,0 +1,19 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic-settings>=2.4
+sqlalchemy>=2.0
+geoalchemy2>=0.15
+psycopg[binary]>=3.2
+alembic>=1.13
+httpx>=0.27
+shapely>=2.0
+pyproj>=3.6
+numpy>=1.26
+pandas>=2.2
+
+# Sprint 1 (tim Data): aktifkan saat mengerjakan pipeline NDVI
+# pystac-client>=0.8
+# planetary-computer>=1.0
+# rasterio>=1.4
+# rio-tiler>=7.0
+
