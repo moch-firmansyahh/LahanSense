@@ -36,3 +36,22 @@ class AlertOut(BaseModel):
     date: str
     message: str
     suggested_action: str
+
+
+class NdviObservationOut(BaseModel):
+    id: int | None = None
+    plot_id: int
+    obs_date: str
+    ndvi_mean: float
+    cloud_cover: float | None
+    source: str
+
+
+class NdviHistoryOut(BaseModel):
+    plot_id: int
+    latest_ndvi: float | None
+    latest_date: str | None
+    confidence: Confidence
+    vegetation_status: str
+    observations: list[NdviObservationOut]
+
