@@ -182,28 +182,11 @@ test.describe("LahanSense Full Feature End-to-End Suite", () => {
     await notifTab.click();
     await expect(page.locator("text=Preferensi Notifikasi & Peringatan").first()).toBeVisible();
 
-    // 8.4 WhatsApp Automation is Active & Testable to 08112222136
+    // 8.4 WhatsApp Automation is Active & Running Automatically to 08112222136
     await expect(page.locator("text=Peringatan Otomatis WhatsApp").first()).toBeVisible();
     await expect(page.locator("text=Aktif 24/7").first()).toBeVisible();
     await expect(page.locator("text=08112222136").first()).toBeVisible();
-
-    // Mock window.open to prevent popup blocking during headless test
-    await page.evaluate(() => {
-      (window as any).__last_opened_url = "";
-      window.open = (url?: string | URL) => {
-        (window as any).__last_opened_url = String(url);
-        return null;
-      };
-    });
-
-    const testWaBtn = page.locator("button:has-text('Uji Coba Kirim WA Sekarang')").first();
-    await expect(testWaBtn).toBeVisible();
-    await testWaBtn.click();
-
-    // Assert feedback confirmation appeared and WhatsApp URL includes 628112222136
-    await expect(page.locator("text=Notifikasi uji coba berhasil disiapkan dan diteruskan").first()).toBeVisible();
-    const openedUrl = await page.evaluate(() => (window as any).__last_opened_url);
-    expect(openedUrl).toContain("https://wa.me/628112222136");
+    await expect(page.locator("text=Notifikasi berjalan otomatis").first()).toBeVisible();
   });
 
   test("9. Sidebar Alignment & State Persistence: Logo Sejajar & Tidak Menutup Saat Navigasi", async ({ page }) => {

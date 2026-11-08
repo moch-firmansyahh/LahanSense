@@ -5,12 +5,9 @@ export const metadata: Metadata = {
   title: "LahanSense - Intelijen Irigasi Tanpa Sensor",
   description: "Intelijen irigasi tanpa sensor: NDVI Sentinel-2 + FAO-56",
   icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/logo.png", type: "image/png" },
-    ],
-    apple: "/logo.png",
+    icon: "/logo.png",
     shortcut: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
@@ -23,10 +20,17 @@ export default function RootLayout({
     <html lang="id" className="h-full antialiased font-sans">
       <head>
         <link rel="icon" href="/logo.png" type="image/png" />
-        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
+        <link rel="icon" href="/logo.png" type="image/png" />
+        <link rel="shortcut icon" href="/logo.png" type="image/png" />
         <link rel="apple-touch-icon" href="/logo.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap"
           rel="stylesheet"

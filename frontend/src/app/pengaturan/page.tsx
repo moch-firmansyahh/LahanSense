@@ -238,22 +238,11 @@ export default function PengaturanPage() {
                     <MessageSquare className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                     <span>Nomor Penerima Siaga: <span className="font-medium">08112222136</span></span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleTestSendWhatsApp}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-normal flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>{waTestSent ? "Terkirim ke WA 08112222136!" : "Uji Coba Kirim WA Sekarang"}</span>
-                  </button>
+                  <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-normal text-emerald-700 flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Notifikasi berjalan otomatis</span>
+                  </div>
                 </div>
-
-                {waTestSent && (
-                  <p className="text-[11px] text-emerald-700 font-normal flex items-center gap-1.5 bg-emerald-100/70 p-2.5 rounded-lg border border-emerald-200">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>Notifikasi uji coba berhasil disiapkan dan diteruskan ke WhatsApp siaga 08112222136.</span>
-                  </p>
-                )}
               </div>
             </div>
           </div>

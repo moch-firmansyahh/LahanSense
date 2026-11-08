@@ -596,15 +596,12 @@ export default function PeringatanPage() {
 
                     {/* Right: Actions */}
                     <div className="flex md:flex-col items-center md:items-end gap-2 shrink-0 self-end md:self-start print:hidden">
-                      <button
-                        type="button"
-                        onClick={() => sendWaAlert(item)}
-                        className="px-3 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-medium flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                        title="Kirim notifikasi otomatis ke 08112222136"
+                      <div
+                        className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-normal flex items-center gap-1.5"
                       >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        <span>{sentWaId === item.id ? "Terkirim ke 08112222136!" : "Kirim Notifikasi WA"}</span>
-                      </button>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-700">Terkirim otomatis ke 08112222136</span>
+                      </div>
 
                       {!item.isResolved && (
                         <button
@@ -648,14 +645,10 @@ export default function PeringatanPage() {
               <span className="text-stone-400 font-normal">Penerima Otomatis:</span>
               <span className="text-emerald-800 font-medium">08112222136</span>
             </div>
-            <Button
-              variant="primary"
-              className="bg-emerald-950 hover:bg-emerald-900 text-white text-xs font-medium cursor-pointer"
-              onClick={() => sendWaAlert(ACTIVE_PROTOCOLS[0])}
-              icon={<Send className="w-3.5 h-3.5" />}
-            >
-              Uji Notifikasi WA
-            </Button>
+            <div className="px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-normal text-emerald-700 flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Notifikasi berjalan otomatis</span>
+            </div>
           </div>
         </div>
 
