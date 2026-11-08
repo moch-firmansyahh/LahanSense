@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_db
 from app.api.v1.plots import build_plot, to_out
 from app.models import Plot
-from app.models.plot import NdviObservation
+from app.models.plot import IrrigationLog, NdviObservation
 from app.schemas.plot import PlotCreate, PlotOut
 
 router = APIRouter()
@@ -82,6 +82,30 @@ def load_demo(db: Session = Depends(get_db)):
                     ndvi_mean=round(sample["ndvi"] + ndvi_delta, 4),
                     cloud_cover=sample["cloud"],
                     source="sentinel-2-demo",
+                )
+            )
+
+    # Seed data log irigasi aktual untuk evaluasi efisiensi demo
+    demo_irrigation_samples = [
+        # Sawah Karawang (irigasi berkala, efisiensi optimal)
+        {"plot_idx": 0, "logs": [(5, 45.0, "Penggenangan macak-macak"), (2, 50.0, "Irigasi rotasi tersier")]},
+        # Kebun Cabai Lembang (irigasi tetes presisi)
+        {
+            "plot_idx": 1,
+            "logs": [(4, 25.0, "Drip fertigasi pagi"), (2, 28.0, "Drip sore hari"), (1, 26.0, "Drip pemeliharaan")],
+        },
+        # Lahan Jagung Gunungkidul (irigasi terbatas / sedikit kurang)
+        {"plot_idx": 2, "logs": [(6, 20.0, "Pompa sumur dalam")]},
+    ]
+    for sample in demo_irrigation_samples:
+        p = plots[sample["plot_idx"]]
+        for days_ago, vol, note in sample["logs"]:
+            db.add(
+                IrrigationLog(
+                    plot_id=p.id,
+                    log_date=today - timedelta(days=days_ago),
+                    volume_m3=vol,
+                    note=note,
                 )
             )
     db.commit()

@@ -1,13 +1,23 @@
-from datetime import date
+from datetime import date, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
 from app.api.v1.plots import get_plot_or_404
-from app.models.plot import NdviObservation
-from app.schemas.analytics import AlertOut, ForecastDay, NdviHistoryOut, NdviObservationOut, RecommendationOut
+from app.models.plot import IrrigationLog, NdviObservation
+from app.schemas.analytics import (
+    AlertOut,
+    EfficiencyOut,
+    ForecastDay,
+    IrrigationLogCreate,
+    IrrigationLogOut,
+    NdviHistoryOut,
+    NdviObservationOut,
+    RecommendationOut,
+)
 from app.services.alerts import build_alerts, build_forecast
+from app.services.efficiency import calculate_irrigation_efficiency
 from app.services.satellite import get_or_create_ndvi_for_plot
 from app.services.water_balance import compute_day
 from app.services.weather import fetch_daily_weather
@@ -98,3 +108,113 @@ def ndvi(plot_id: int, db: Session = Depends(get_db)):
         vegetation_status=veg_status,
         observations=obs_out,
     )
+
+
+# --- Irrigation Log Endpoints ---
+
+
+@router.post("/{plot_id}/irrigation-log", response_model=IrrigationLogOut, status_code=status.HTTP_201_CREATED)
+def create_irrigation_log(
+    plot_id: int,
+    payload: IrrigationLogCreate,
+    db: Session = Depends(get_db),
+):
+    plot = get_plot_or_404(db, plot_id)
+    try:
+        parsed_date = date.fromisoformat(payload.log_date)
+    except ValueError:
+        raise HTTPException(422, detail="Format tanggal harus YYYY-MM-DD")
+
+    log_entry = IrrigationLog(
+        plot_id=plot.id,
+        log_date=parsed_date,
+        volume_m3=payload.volume_m3,
+        note=payload.note,
+    )
+    db.add(log_entry)
+    db.commit()
+    db.refresh(log_entry)
+
+    return IrrigationLogOut(
+        id=log_entry.id,
+        plot_id=log_entry.plot_id,
+        log_date=log_entry.log_date.isoformat(),
+        volume_m3=float(log_entry.volume_m3),
+        note=log_entry.note,
+    )
+
+
+@router.get("/{plot_id}/irrigation-logs", response_model=list[IrrigationLogOut])
+def list_irrigation_logs(
+    plot_id: int,
+    limit: int = Query(30, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    plot = get_plot_or_404(db, plot_id)
+    records = (
+        db.query(IrrigationLog)
+        .filter(IrrigationLog.plot_id == plot.id)
+        .order_by(IrrigationLog.log_date.desc(), IrrigationLog.id.desc())
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        IrrigationLogOut(
+            id=r.id,
+            plot_id=r.plot_id,
+            log_date=r.log_date.isoformat(),
+            volume_m3=float(r.volume_m3),
+            note=r.note,
+        )
+        for r in records
+    ]
+
+
+@router.delete("/{plot_id}/irrigation-logs/{log_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_irrigation_log(
+    plot_id: int,
+    log_id: int,
+    db: Session = Depends(get_db),
+):
+    get_plot_or_404(db, plot_id)
+    log_entry = db.get(IrrigationLog, log_id)
+    if not log_entry or log_entry.plot_id != plot_id:
+        raise HTTPException(404, detail="Log irigasi tidak ditemukan")
+
+    db.delete(log_entry)
+    db.commit()
+    return None
+
+
+# --- Irrigation Efficiency Audit ---
+
+
+@router.get("/{plot_id}/efficiency", response_model=EfficiencyOut)
+def efficiency(
+    plot_id: int,
+    days: int = Query(7, ge=1, le=30, description="Rentang evaluasi hari"),
+    db: Session = Depends(get_db),
+):
+    plot = get_plot_or_404(db, plot_id)
+    weather = fetch_daily_weather(plot.centroid_lat, plot.centroid_lng, past_days=days + 1, forecast_days=1)
+
+    start_date = date.today() - timedelta(days=days - 1)
+    logs = (
+        db.query(IrrigationLog)
+        .filter(
+            IrrigationLog.plot_id == plot.id,
+            IrrigationLog.log_date >= start_date,
+            IrrigationLog.log_date <= date.today(),
+        )
+        .all()
+    )
+
+    result = calculate_irrigation_efficiency(
+        plot=plot,
+        weather=weather,
+        logs=logs,
+        period_days=days,
+        end_date=date.today(),
+    )
+    return result

@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     app_env: str = "development"
     cors_origins: str = "http://localhost:3000"
-    database_url: str
+    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/postgres"
     open_meteo_base_url: str = "https://api.open-meteo.com/v1"
     demo_mode: bool = True
 
