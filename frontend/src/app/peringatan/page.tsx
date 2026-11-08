@@ -262,55 +262,12 @@ export default function PeringatanPage() {
 
   return (
     <AppShell title="Pusat Peringatan Dini Agrometeorologi">
-      <div className="space-y-6 font-sans">
-        {/* OFFICIAL PRINT HEADER (Only visible when printing to PDF / Paper) */}
-        <div className="hidden print:block mb-5 pb-3 border-b-2 border-stone-800">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="LahanSense" className="w-12 h-12 object-contain" />
-              <div>
-                <h1 className="text-base font-medium tracking-tight text-stone-900 m-0">
-                  BERITA ACARA PERINGATAN DINI KEKERINGAN & CEKAMAN AIR
-                </h1>
-                <p className="text-[11px] text-stone-600 m-0">
-                  Sistem Intelijen Irigasi Presisi LahanSense · BMKG Agrometeorologi & Sentinel-2 10m
-                </p>
-              </div>
-            </div>
-            <div className="text-right text-[10px] text-stone-600">
-              <p className="font-mono m-0 font-medium text-stone-800">No: EWS-LHS-20261108</p>
-              <p className="m-0">Tanggal: 08 November 2026</p>
-              <p className="m-0">Penerima Siaga: 08112222136</p>
-            </div>
-          </div>
-        </div>
-
-        {/* OFFICIAL PRINT HEADER (Only visible when printing to PDF / Paper) */}
-        <div className="hidden print:block mb-5 pb-3 border-b-2 border-stone-800">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="LahanSense" className="w-12 h-12 object-contain" />
-              <div>
-                <h1 className="text-base font-medium tracking-tight text-stone-900 m-0">
-                  BERITA ACARA PERINGATAN DINI KEKERINGAN & CEKAMAN AIR
-                </h1>
-                <p className="text-[11px] text-stone-600 m-0">
-                  Sistem Intelijen Irigasi Presisi LahanSense · BMKG Agrometeorologi & Sentinel-2 10m
-                </p>
-              </div>
-            </div>
-            <div className="text-right text-[10px] text-stone-600">
-              <p className="font-mono m-0 font-medium text-stone-800">No: EWS-LHS-20261108</p>
-              <p className="m-0">Tanggal: 08 November 2026</p>
-              <p className="m-0">Penerima Siaga: 08112222136</p>
-            </div>
-          </div>
-        </div>
-
+      {/* ==================================================================== */}
+      {/* 1. SCREEN VIEW: Interactive Web Interface (Hidden during Print to PDF) */}
+      {/* ==================================================================== */}
+      <div className="space-y-6 font-sans print:hidden">
         {/* Header Terminal Title */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-stone-200/80 print:hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-stone-200/80">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-rose-500" />
@@ -651,28 +608,157 @@ export default function PeringatanPage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* OFFICIAL PRINT SIGNATURE (Only visible when printing to PDF / Paper) */}
-        <div className="hidden print:grid print:grid-cols-2 gap-8 mt-8 pt-6 border-t border-stone-300 print-break-avoid">
-          <div className="text-center">
-            <p className="text-xs text-stone-600 mb-14">Petugas Pengamat Wilayah / P3A</p>
-            <p className="text-xs font-medium text-stone-900 border-t border-stone-400 pt-1 inline-block px-10">( ............................................. )</p>
+      {/* ==================================================================== */}
+      {/* 2. DEDICATED OFFICIAL PRINT DOCUMENT (Only rendered during Print to PDF) */}
+      {/* ==================================================================== */}
+      <div className="hidden print:block font-sans text-stone-900 bg-white leading-normal text-xs">
+        {/* Kop Surat Dokumen Kedinasan / Formal Letterhead */}
+        <div className="pb-3 border-b-2 border-stone-900">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="LahanSense" className="w-14 h-14 object-contain shrink-0" />
+              <div>
+                <h2 className="text-[10px] uppercase tracking-widest text-stone-600 font-medium m-0">
+                  SISTEM INTELIJEN IRIGASI PRESISI LAHANSENSE
+                </h2>
+                <h1 className="text-base font-medium tracking-tight text-stone-950 m-0 leading-tight">
+                  BERITA ACARA PERINGATAN DINI KEKERINGAN & CEKAMAN AIR
+                </h1>
+                <p className="text-[11px] text-stone-600 m-0 mt-0.5">
+                  Pusat Monitoring Agrometeorologi · Satelit Sentinel-2 MSI (10m) & Pemodelan FAO-56 Penman-Monteith
+                </p>
+              </div>
+            </div>
+            <div className="text-right text-[10px] text-stone-600 shrink-0 border-l border-stone-300 pl-3">
+              <p className="font-mono m-0 font-medium text-stone-900">No: BA-EWS/LHS/XI/2026/042</p>
+              <p className="m-0">Tanggal: 08 November 2026</p>
+              <p className="m-0">Periode: 08 – 14 November 2026</p>
+              <p className="m-0 text-emerald-800 font-medium">Status: RESMI & TERVERIFIKASI</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-xs text-stone-600 mb-14">Ketua Kelompok Tani / Petani Utama</p>
-            <p className="text-xs font-medium text-stone-900 border-t border-stone-400 pt-1 inline-block px-10">( ............................................. )</p>
-          </div>
+          <div className="border-b border-stone-400 mt-2" />
         </div>
 
-        {/* OFFICIAL PRINT SIGNATURE (Only visible when printing to PDF / Paper) */}
-        <div className="hidden print:grid print:grid-cols-2 gap-8 mt-8 pt-6 border-t border-stone-300 print-break-avoid">
-          <div className="text-center">
-            <p className="text-xs text-stone-600 mb-14">Petugas Pengamat Wilayah / P3A</p>
-            <p className="text-xs font-medium text-stone-900 border-t border-stone-400 pt-1 inline-block px-10">( ............................................. )</p>
+        {/* Klausul Pengantar Dokumen Resmi */}
+        <div className="my-3 text-[11px] text-stone-700 bg-stone-50 p-2.5 rounded border border-stone-200 leading-relaxed">
+          <p className="m-0">
+            Berdasarkan hasil pemrosesan spektral reflektansi satelit Sentinel-2B Orbit 124 dan reanalisis cuaca BMKG/ERA5, sistem menetapkan status bahaya kekeringan pada petak hamparan berikut. Petugas wilayah dan petani penanggung jawab wajib mengimplementasikan instruksi mitigasi lapangan sebelum batas waktu yang ditentukan.
+          </p>
+        </div>
+
+        {/* Bagian I: Ringkasan Status Risiko Wilayah */}
+        <div className="mb-3.5">
+          <h3 className="text-xs font-medium uppercase tracking-wider text-stone-700 mb-1.5">
+            I. Ringkasan Eksekutif Status Wilayah
+          </h3>
+          <table className="w-full text-[10px] border-collapse">
+            <thead>
+              <tr className="bg-stone-100 text-stone-800 border border-stone-300">
+                <th className="p-1.5 text-center w-1/4">Total Petak Terpantau</th>
+                <th className="p-1.5 text-center w-1/4">Petak Status Kritis</th>
+                <th className="p-1.5 text-center w-1/4">Petak Status Waspada</th>
+                <th className="p-1.5 text-center w-1/4">Estimasi Defisit Air Mendesak</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border border-stone-200 text-center font-medium">
+                <td className="p-2 text-stone-800">10 Petak Hamparan</td>
+                <td className="p-2 text-rose-700 bg-rose-50/50">{criticalCount} Petak (Tindakan &lt; 24 Jam)</td>
+                <td className="p-2 text-amber-700 bg-amber-50/50">{warningCount} Petak (Siaga 48 Jam)</td>
+                <td className="p-2 text-blue-800 font-mono">48.0 m³ Total Volume</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Bagian II: Tabel Berita Acara Protokol Tindakan Lapangan */}
+        <div className="mb-4">
+          <h3 className="text-xs font-medium uppercase tracking-wider text-stone-700 mb-1.5">
+            II. Rincian Protokol Mitigasi Per Petak Lahan
+          </h3>
+          <table className="w-full text-[10px] border-collapse">
+            <thead>
+              <tr className="bg-stone-100 text-stone-900 border border-stone-300">
+                <th className="p-2 text-center w-8">No</th>
+                <th className="p-2 text-left w-36">Petak Lahan & Komoditas</th>
+                <th className="p-2 text-center w-28">Fase Pertumbuhan</th>
+                <th className="p-2 text-center w-20">Tingkat Risiko</th>
+                <th className="p-2 text-center w-24">Defisit Air</th>
+                <th className="p-2 text-left">Instruksi Mitigasi Lapangan</th>
+                <th className="p-2 text-center w-24">Batas Waktu</th>
+              </tr>
+            </thead>
+            <tbody>
+              {protocols.map((item, idx) => (
+                <tr key={item.id} className="border border-stone-200">
+                  <td className="p-2 text-center font-medium">{idx + 1}</td>
+                  <td className="p-2">
+                    <p className="font-medium text-stone-900 m-0">{item.plotName}</p>
+                    <p className="text-stone-500 text-[9px] m-0 capitalize">Komoditas: {item.crop}</p>
+                  </td>
+                  <td className="p-2 text-center text-stone-700">{item.growthStage}</td>
+                  <td className="p-2 text-center">
+                    <span className={item.severity === "kritis" ? "text-rose-700 font-medium" : "text-amber-700 font-medium"}>
+                      {item.severity === "kritis" ? "KRITIS" : "WASPADA"}
+                    </span>
+                  </td>
+                  <td className="p-2 text-center font-mono">
+                    {item.deficitMm} mm<br />
+                    <span className="text-stone-500 text-[9px]">({item.volumeM3} m³)</span>
+                  </td>
+                  <td className="p-2 text-stone-800 leading-relaxed">
+                    {item.fieldAction}
+                  </td>
+                  <td className="p-2 text-center font-medium text-stone-900 whitespace-nowrap">
+                    {item.targetDeadline}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Bagian III: Dasar Teknis & Pengiriman Otomatis */}
+        <div className="mb-4 text-[10px] text-stone-600 space-y-1 p-2.5 rounded bg-stone-50 border border-stone-200">
+          <p className="m-0 font-medium text-stone-800">Dasar Perhitungan & Integritas Data:</p>
+          <p className="m-0 leading-relaxed">
+            1. Perhitungan neraca air harian mengacu pada standar <i>FAO Irrigation and Drainage Paper No. 56</i> (Penman-Monteith).
+          </p>
+          <p className="m-0 leading-relaxed">
+            2. Koefisien tanaman (Kc) dikalibrasi hibrida dengan ground-truth indeks vegetasi (NDVI) satelit Sentinel-2 resolusi 10 meter.
+          </p>
+          <p className="m-0 leading-relaxed text-emerald-800 font-medium">
+            3. Peringatan dini telah diteruskan secara otomatis ke nomor siaga WhatsApp pengelola: 08112222136.
+          </p>
+        </div>
+
+        {/* Bagian IV: Pengesahan & Tanda Tangan 3 Pihak (Single Professional Block) */}
+        <div className="mt-6 pt-3 border-t border-stone-300 break-inside-avoid">
+          <div className="text-right text-[10px] text-stone-600 mb-2">
+            Diterbitkan di Wilayah Operasional Pertanian, 08 November 2026
           </div>
-          <div className="text-center">
-            <p className="text-xs text-stone-600 mb-14">Ketua Kelompok Tani / Petani Utama</p>
-            <p className="text-xs font-medium text-stone-900 border-t border-stone-400 pt-1 inline-block px-10">( ............................................. )</p>
+          <div className="grid grid-cols-3 gap-6 text-center text-xs">
+            <div>
+              <p className="text-[11px] text-stone-600 mb-14">Petugas Pengamat Wilayah / P3A</p>
+              <p className="font-medium text-stone-900 border-t border-stone-400 pt-1 inline-block px-6">
+                ( ............................................. )
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] text-stone-600 mb-14">Sistem Agrometeorologi LahanSense</p>
+              <p className="font-medium text-stone-900 border-t border-stone-400 pt-1 inline-block px-6">
+                ( TERVERIFIKASI OTOMATIS )
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] text-stone-600 mb-14">Ketua Kelompok Tani / Petani Utama</p>
+              <p className="font-medium text-stone-900 border-t border-stone-400 pt-1 inline-block px-6">
+                ( ............................................. )
+              </p>
+            </div>
           </div>
         </div>
       </div>
