@@ -1,20 +1,13 @@
 from datetime import date
+
 from app.services.satellite import get_latest_ndvi
-from app.services.water_balance import compute_day, blended_kc, kc_from_ndvi
+from app.services.water_balance import compute_day
 
 
 def test_get_latest_ndvi_structure():
     geom = {
         "type": "Polygon",
-        "coordinates": [
-            [
-                [107.30, -6.30],
-                [107.31, -6.30],
-                [107.31, -6.31],
-                [107.30, -6.31],
-                [107.30, -6.30]
-            ]
-        ]
+        "coordinates": [[[107.30, -6.30], [107.31, -6.30], [107.31, -6.31], [107.30, -6.31], [107.30, -6.30]]],
     }
     res = get_latest_ndvi(geom, around=date.today())
     assert isinstance(res, dict)

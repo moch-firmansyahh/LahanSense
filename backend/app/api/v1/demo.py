@@ -58,6 +58,7 @@ def _demo_payloads() -> list[PlotCreate]:
 @router.post("/load", response_model=list[PlotOut])
 def load_demo(db: Session = Depends(get_db)):
     """Idempoten: hapus poligon demo lama, lalu isi ulang."""
+    today = date.today()
     db.execute(delete(Plot).where(Plot.is_demo.is_(True)))
     plots = [build_plot(p, is_demo=True) for p in _demo_payloads()]
     db.add_all(plots)
@@ -68,7 +69,7 @@ def load_demo(db: Session = Depends(get_db)):
     # Seed data observasi NDVI Sentinel-2 untuk ketiga plot demo
     demo_ndvi_samples = [
         {"plot_idx": 0, "ndvi": 0.68, "cloud": 12.0},  # Sawah Karawang
-        {"plot_idx": 1, "ndvi": 0.72, "cloud": 8.5},   # Kebun Cabai Lembang
+        {"plot_idx": 1, "ndvi": 0.72, "cloud": 8.5},  # Kebun Cabai Lembang
         {"plot_idx": 2, "ndvi": 0.58, "cloud": 18.0},  # Lahan Jagung Gunungkidul
     ]
     for sample in demo_ndvi_samples:

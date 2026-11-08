@@ -54,4 +54,3 @@ class NdviHistoryOut(BaseModel):
     confidence: Confidence
     vegetation_status: str
     observations: list[NdviObservationOut]
-

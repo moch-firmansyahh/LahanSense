@@ -2,8 +2,10 @@
 Layanan Citra Satelit Sentinel-2 MSI Level-2A & Ekstraksi NDVI
 Sesuai rancangan proposal: Zero-Hardware Virtual Vegetation Sensor.
 """
+
 from datetime import date, timedelta
 from typing import Any
+
 import httpx
 from shapely.geometry import mapping, shape
 from sqlalchemy.orm import Session
@@ -41,7 +43,7 @@ def get_latest_ndvi(geometry: dict[str, Any], around: date | None = None) -> dic
         "datetime": f"{start_date.isoformat()}/{around.isoformat()}",
         "query": {"eo:cloud_cover": {"lt": 50}},
         "sortby": [{"field": "datetime", "direction": "desc"}],
-        "limit": 1
+        "limit": 1,
     }
 
     try:
@@ -65,7 +67,7 @@ def get_latest_ndvi(geometry: dict[str, Any], around: date | None = None) -> dic
                         "obs_date": obs_date,
                         "ndvi_mean": round(mean_ndvi, 4),
                         "cloud_cover": round(cloud, 2),
-                        "source": "sentinel-2-l2a"
+                        "source": "sentinel-2-l2a",
                     }
     except Exception:
         pass  # Gunakan temporal fallback agar demo tidak pernah blank
@@ -79,7 +81,7 @@ def get_latest_ndvi(geometry: dict[str, Any], around: date | None = None) -> dic
         "obs_date": around - timedelta(days=2),
         "ndvi_mean": simulated_ndvi,
         "cloud_cover": 12.5,
-        "source": "sentinel-2-simulated"
+        "source": "sentinel-2-simulated",
     }
 
 
@@ -103,6 +105,7 @@ def get_or_create_ndvi_for_plot(db: Session, plot: Plot, around: date | None = N
 
     # Ambil geometri GeoJSON dari poligon plot
     from geoalchemy2.shape import to_shape
+
     try:
         geom_dict = mapping(to_shape(plot.geom))
     except Exception:
@@ -117,7 +120,7 @@ def get_or_create_ndvi_for_plot(db: Session, plot: Plot, around: date | None = N
         obs_date=ndvi_data["obs_date"],
         ndvi_mean=ndvi_data["ndvi_mean"],
         cloud_cover=ndvi_data["cloud_cover"],
-        source=ndvi_data["source"]
+        source=ndvi_data["source"],
     )
     db.add(new_obs)
     db.commit()
