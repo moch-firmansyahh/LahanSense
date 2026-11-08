@@ -116,7 +116,7 @@ export default function DashboardPage() {
     <main className="flex h-screen flex-col md:flex-row">
       <aside className="max-h-[55vh] w-full shrink-0 space-y-4 overflow-y-auto border-b bg-gray-50 p-4 md:max-h-none md:w-[400px] md:border-b-0 md:border-r">
         <header>
-          <h1 className="text-xl font-bold text-green-700">LahanSense</h1>
+          <h1 className="text-xl font-normal text-green-700">LahanSense</h1>
           <p className="text-xs text-gray-500">Intelijen irigasi tanpa sensor</p>
         </header>
 
@@ -142,7 +142,7 @@ export default function DashboardPage() {
 
         {plots.length > 0 && !draft && (
           <div>
-            <h3 className="mb-1 text-sm font-semibold">Lahan Anda</h3>
+            <h3 className="mb-1 text-sm font-medium">Lahan Anda</h3>
             <ul className="space-y-1">
               {plots.map((p) => (
                 <li key={p.id}>

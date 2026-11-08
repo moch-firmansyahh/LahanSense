@@ -10,8 +10,8 @@ export default function RecommendationCard({ rec }: { rec: Recommendation }) {
   return (
     <div className="space-y-3 rounded-lg border bg-white p-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Rekomendasi hari ini</h3>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold uppercase ${COLOR[rec.status]}`}>
+        <h3 className="font-medium">Rekomendasi hari ini</h3>
+        <span className={`rounded-full px-3 py-1 text-xs font-medium uppercase ${COLOR[rec.status]}`}>
           {rec.status}
         </span>
       </div>
@@ -26,9 +26,9 @@ export default function RecommendationCard({ rec }: { rec: Recommendation }) {
       )}
 
       <dl className="grid grid-cols-3 gap-2 text-center text-xs">
-        <div className="rounded bg-gray-50 p-2"><dt className="text-gray-500">ET₀</dt><dd className="font-semibold">{rec.et0_mm} mm</dd></div>
-        <div className="rounded bg-gray-50 p-2"><dt className="text-gray-500">Kc</dt><dd className="font-semibold">{rec.kc}</dd></div>
-        <div className="rounded bg-gray-50 p-2"><dt className="text-gray-500">Hujan efektif</dt><dd className="font-semibold">{rec.effective_rain_mm} mm</dd></div>
+        <div className="rounded bg-gray-50 p-2"><dt className="text-gray-500">ET₀</dt><dd className="font-medium">{rec.et0_mm} mm</dd></div>
+        <div className="rounded bg-gray-50 p-2"><dt className="text-gray-500">Kc</dt><dd className="font-medium">{rec.kc}</dd></div>
+        <div className="rounded bg-gray-50 p-2"><dt className="text-gray-500">Hujan efektif</dt><dd className="font-medium">{rec.effective_rain_mm} mm</dd></div>
       </dl>
 
       <p className="text-xs text-gray-500">{rec.reason}</p>

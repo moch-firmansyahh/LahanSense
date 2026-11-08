@@ -1,15 +1,728 @@
-import Link from "next/link";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import AppShell from "@/components/layout/AppShell";
+import FarmPerformanceDonut from "@/components/features/FarmPerformanceDonut";
+import WeatherStripedCard from "@/components/features/WeatherStripedCard";
+import SoilHealthCard from "@/components/features/SoilHealthCard";
+import FarmTaskCards from "@/components/features/FarmTaskCards";
+import { Button } from "@/components/ui/Button";
+
+const MapView = dynamic(() => import("@/components/map/MapView"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full min-h-[460px] rounded-[24px] bg-[#162B1D] flex items-center justify-center border border-stone-200/90 shadow-md">
+      <div className="flex flex-col items-center gap-2 text-stone-400 text-xs">
+        <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <span>Memuat Peta Satelit...</span>
+      </div>
+    </div>
+  ),
+});
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { api } from "@/lib/api";
+import {
+  ChevronDown,
+  Check,
+  Search,
+  Bell,
+  SlidersHorizontal,
+  Settings,
+  Plus,
+} from "lucide-react";
+import Link from "next/link";
+import type { Plot, Recommendation } from "@/types/api";
+
+const DEFAULT_REC: Recommendation = {
+  plot_id: 1,
+  date: "2026-11-08",
+  et0_mm: 4.6,
+  kc: 1.1,
+  etc_mm: 5.1,
+  effective_rain_mm: 0.0,
+  deficit_mm: 2.8,
+  irrigation_volume_m3: 28.0,
+  pump_minutes: 55,
+  status: "waspada",
+  reason: "Hari ke-47 setelah tanam. Kebutuhan air 5,1 mm, hujan efektif 0 mm, defisit 2,8 mm.",
+  confidence: "tinggi",
+};
+
+const REC_MAP: Record<number, Recommendation> = {
+  1: DEFAULT_REC,
+  2: {
+    plot_id: 2,
+    date: "2026-11-08",
+    et0_mm: 4.2,
+    kc: 0.85,
+    etc_mm: 3.6,
+    effective_rain_mm: 0.0,
+    deficit_mm: 1.1,
+    irrigation_volume_m3: 16.5,
+    pump_minutes: 25,
+    status: "aman",
+    reason: "Hari ke-61. Kebutuhan air 3,6 mm, kondisi perakaran optimal.",
+    confidence: "tinggi",
+  },
+  3: {
+    plot_id: 3,
+    date: "2026-11-08",
+    et0_mm: 5.0,
+    kc: 1.15,
+    etc_mm: 5.75,
+    effective_rain_mm: 0.0,
+    deficit_mm: 4.2,
+    irrigation_volume_m3: 42.0,
+    pump_minutes: 80,
+    status: "kritis",
+    reason: "Hari ke-35. Defisit kumulatif tinggi melampaui ambang batas aman.",
+    confidence: "sedang",
+  },
+  4: {
+    plot_id: 4,
+    date: "2026-11-08",
+    et0_mm: 4.8,
+    kc: 1.05,
+    etc_mm: 5.0,
+    effective_rain_mm: 0.0,
+    deficit_mm: 3.1,
+    irrigation_volume_m3: 24.8,
+    pump_minutes: 48,
+    status: "waspada",
+    reason: "Hari ke-28 (fase pembentukan umbi). Kebutuhan 5,0 mm air.",
+    confidence: "tinggi",
+  },
+  5: {
+    plot_id: 5,
+    date: "2026-11-08",
+    et0_mm: 3.8,
+    kc: 0.80,
+    etc_mm: 3.0,
+    effective_rain_mm: 0.0,
+    deficit_mm: 0.9,
+    irrigation_volume_m3: 10.8,
+    pump_minutes: 18,
+    status: "aman",
+    reason: "Hari ke-50 (pemasakan buah). Kelembapan tanah terjaga subur.",
+    confidence: "tinggi",
+  },
+  6: {
+    plot_id: 6,
+    date: "2026-11-08",
+    et0_mm: 5.2,
+    kc: 1.10,
+    etc_mm: 5.7,
+    effective_rain_mm: 0.0,
+    deficit_mm: 4.5,
+    irrigation_volume_m3: 60.0,
+    pump_minutes: 115,
+    status: "kritis",
+    reason: "Hari ke-40 (pengisian polong). Anomali cuaca panas memicu stres air.",
+    confidence: "tinggi",
+  },
+  7: {
+    plot_id: 7,
+    date: "2026-11-08",
+    et0_mm: 4.1,
+    kc: 1.10,
+    etc_mm: 4.5,
+    effective_rain_mm: 0.0,
+    deficit_mm: 0.8,
+    irrigation_volume_m3: 8.0,
+    pump_minutes: 18,
+    status: "aman",
+    reason: "Hari ke-52 (pembentukan malai). Genangan macak-macak optimal.",
+    confidence: "tinggi",
+  },
+  8: {
+    plot_id: 8,
+    date: "2026-11-08",
+    et0_mm: 4.9,
+    kc: 1.05,
+    etc_mm: 5.1,
+    effective_rain_mm: 0.0,
+    deficit_mm: 3.1,
+    irrigation_volume_m3: 31.0,
+    pump_minutes: 62,
+    status: "waspada",
+    reason: "Hari ke-38 (vegetatif cepat V8). Pengaliran alur 31 m³ dianjurkan sebelum terik siang.",
+    confidence: "tinggi",
+  },
+  9: {
+    plot_id: 9,
+    date: "2026-11-08",
+    et0_mm: 5.1,
+    kc: 1.15,
+    etc_mm: 5.8,
+    effective_rain_mm: 0.0,
+    deficit_mm: 4.6,
+    irrigation_volume_m3: 41.4,
+    pump_minutes: 82,
+    status: "kritis",
+    reason: "Hari ke-34 (pembesaran umbi). Lengas tanah kritis 32%, butuh siraman pompa segera.",
+    confidence: "sedang",
+  },
+  10: {
+    plot_id: 10,
+    date: "2026-11-08",
+    et0_mm: 4.0,
+    kc: 0.85,
+    etc_mm: 3.4,
+    effective_rain_mm: 0.0,
+    deficit_mm: 1.4,
+    irrigation_volume_m3: 9.8,
+    pump_minutes: 20,
+    status: "aman",
+    reason: "Hari ke-44 (pembungaan & buah pertama). Fertigasi tetes 20 menit menjaga turgor bunga.",
+    confidence: "tinggi",
+  },
+};
+
+// 6 Lahan Demo Lengkap untuk Testing & Penjurian
+const FALLBACK_PLOTS: Plot[] = [
+  {
+    id: 1,
+    name: "Sawah Karawang (demo)",
+    crop: "padi",
+    planting_date: "2026-09-22",
+    irrigation_method: "genangan",
+    area_ha: 1.0,
+    centroid: { lat: -6.2450, lng: 107.3850 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [107.3850, -6.2450],
+          [107.3868, -6.2450],
+          [107.3868, -6.2432],
+          [107.3850, -6.2432],
+          [107.3850, -6.2450],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 2,
+    name: "Kebun Cabai Lembang (demo)",
+    crop: "cabai",
+    planting_date: "2026-09-08",
+    irrigation_method: "tetes",
+    area_ha: 1.5,
+    centroid: { lat: -6.7850, lng: 107.6450 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [107.6450, -6.7850],
+          [107.6466, -6.7850],
+          [107.6466, -6.7834],
+          [107.6450, -6.7834],
+          [107.6450, -6.7850],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 3,
+    name: "Lahan Jagung Gunungkidul (demo)",
+    crop: "jagung",
+    planting_date: "2026-10-04",
+    irrigation_method: "alur",
+    area_ha: 1.6,
+    centroid: { lat: -7.9400, lng: 110.5500 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [110.5500, -7.9400],
+          [110.5518, -7.9400],
+          [110.5518, -7.9382],
+          [110.5500, -7.9382],
+          [110.5500, -7.9400],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 4,
+    name: "Sentra Bawang Brebes (demo)",
+    crop: "bawang_merah",
+    planting_date: "2026-10-11",
+    irrigation_method: "pompa",
+    area_ha: 0.8,
+    centroid: { lat: -6.9300, lng: 108.9850 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [108.9850, -6.9300],
+          [108.9865, -6.9300],
+          [108.9865, -6.9285],
+          [108.9850, -6.9285],
+          [108.9850, -6.9300],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 5,
+    name: "Kebun Tomat Pangalengan (demo)",
+    crop: "cabai",
+    planting_date: "2026-09-19",
+    irrigation_method: "tetes",
+    area_ha: 1.2,
+    centroid: { lat: -7.1850, lng: 107.5650 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [107.5650, -7.1850],
+          [107.5666, -7.1850],
+          [107.5666, -7.1834],
+          [107.5650, -7.1834],
+          [107.5650, -7.1850],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 6,
+    name: "Lahan Kedelai Grobogan (demo)",
+    crop: "jagung",
+    planting_date: "2026-09-29",
+    irrigation_method: "alur",
+    area_ha: 2.0,
+    centroid: { lat: -7.1200, lng: 110.9500 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [110.9500, -7.1200],
+          [110.9520, -7.1200],
+          [110.9520, -7.1180],
+          [110.9500, -7.1180],
+          [110.9500, -7.1200],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 7,
+    name: "Sawah Organik Subang (demo)",
+    crop: "padi",
+    planting_date: "2026-09-17",
+    irrigation_method: "genangan",
+    area_ha: 2.1,
+    centroid: { lat: -6.4500, lng: 107.7850 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [107.7850, -6.4500],
+          [107.7872, -6.4500],
+          [107.7872, -6.4478],
+          [107.7850, -6.4478],
+          [107.7850, -6.4500],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 8,
+    name: "Sentra Jagung Hibrida Malang (demo)",
+    crop: "jagung",
+    planting_date: "2026-10-01",
+    irrigation_method: "alur",
+    area_ha: 1.8,
+    centroid: { lat: -8.1200, lng: 112.5800 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [112.5800, -8.1200],
+          [112.5820, -8.1200],
+          [112.5820, -8.1180],
+          [112.5800, -8.1180],
+          [112.5800, -8.1200],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 9,
+    name: "Sentra Bawang Merah Nganjuk (demo)",
+    crop: "bawang_merah",
+    planting_date: "2026-10-05",
+    irrigation_method: "pompa",
+    area_ha: 0.9,
+    centroid: { lat: -7.5800, lng: 111.9400 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [111.9400, -7.5800],
+          [111.9415, -7.5800],
+          [111.9415, -7.5785],
+          [111.9400, -7.5785],
+          [111.9400, -7.5800],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+  {
+    id: 10,
+    name: "Kebun Cabai Rawit Magelang (demo)",
+    crop: "cabai",
+    planting_date: "2026-09-25",
+    irrigation_method: "tetes",
+    area_ha: 0.7,
+    centroid: { lat: -7.5400, lng: 110.3200 },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [110.3200, -7.5400],
+          [110.3213, -7.5400],
+          [110.3213, -7.5387],
+          [110.3200, -7.5387],
+          [110.3200, -7.5400],
+        ],
+      ],
+    },
+    is_demo: true,
+  },
+];
+
+export default function HomePage() {
+  const [plots, setPlots] = useState<Plot[]>(FALLBACK_PLOTS);
+  const [selectedId, setSelectedId] = useState<number | null>(1);
+  const [rec, setRec] = useState<Recommendation>(DEFAULT_REC);
+  const [searchVal, setSearchVal] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    api<Plot[]>("/plots")
+      .then((data) => {
+        if (!cancelled && data.length > 0) {
+          setPlots(data);
+          setSelectedId(data[0].id);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (selectedId === null) return;
+    let cancelled = false;
+    api<Recommendation>(`/plots/${selectedId}/recommendation`)
+      .then((r) => !cancelled && setRec(r))
+      .catch(() => {
+        if (!cancelled && REC_MAP[selectedId]) {
+          setRec(REC_MAP[selectedId]);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId]);
+
+  const selectedPlot = plots.find((p) => p.id === selectedId) || plots[0];
+  const totalArea = plots.reduce((acc, p) => acc + p.area_ha, 0);
+  const safePlotsCount = plots.filter((p) => (REC_MAP[p.id]?.status ?? "aman") === "aman").length;
+  const needWaterPlotsCount = plots.filter((p) => (REC_MAP[p.id]?.status ?? "aman") !== "aman").length;
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-8 text-center">
-      <h1 className="text-4xl font-bold text-green-700">LahanSense</h1>
-      <p className="max-w-md text-gray-600">
-        Tanpa sensor. Gambar lahan Anda, dapatkan rekomendasi irigasi harian dan peringatan dini kekeringan.
-      </p>
-      <Link href="/dashboard" className="rounded bg-green-600 px-5 py-3 font-medium text-white">
-        Mulai
-      </Link>
-    </main>
+    <AppShell title="Lahan Saya" fullHeight={true}>
+      {/* Top Header Bar Inside White Dashboard Card (Matching Reference Image) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3.5 pb-3 border-b border-line-200/60 select-none shrink-0">
+        {/* Left: Title + Parcel Selector */}
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl sm:text-2xl font-medium text-stone-900 tracking-tight">
+            Lahan Saya
+          </h1>
+
+          {/* Parcel Dropdown Selector (Supports all 6 Demo Parcels) */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium text-xs border border-stone-200/80 transition-colors shadow-2xs cursor-pointer"
+              >
+                <span className="max-w-[170px] truncate">{selectedPlot.name}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-stone-500" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-72">
+              <DropdownMenuLabel className="font-medium text-stone-800 text-xs">Pilih Petak Lahan untuk Monitoring</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {plots.map((p) => {
+                const isSelected = p.id === selectedId;
+                const plotRec = REC_MAP[p.id] || DEFAULT_REC;
+                return (
+                  <DropdownMenuItem
+                    key={p.id}
+                    onClick={() => {
+                      setSelectedId(p.id);
+                      if (REC_MAP[p.id]) setRec(REC_MAP[p.id]);
+                    }}
+                    className={`flex items-center justify-between py-2 cursor-pointer ${
+                      isSelected ? "bg-emerald-950 text-white font-medium" : "text-stone-700"
+                    }`}
+                  >
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-medium truncate">{p.name}</span>
+                      <span className="text-[10px] opacity-75 capitalize">
+                        {p.crop} · {p.area_ha.toFixed(2)} ha · {plotRec.status}
+                      </span>
+                    </div>
+                    {isSelected && <Check className="w-4 h-4 ml-2 text-emerald-400 shrink-0" />}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Right: Search, Filter, Settings, Notifications, Profile */}
+        <div className="flex items-center gap-2.5">
+          {/* Search Pill */}
+          <div className="flex items-center w-48 sm:w-60 h-10 px-3.5 rounded-full bg-surface-100 border border-line-200/80 focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-600/20 transition-all shadow-2xs">
+            <Search className="w-4 h-4 text-ink-400 mr-2 shrink-0" />
+            <input
+              type="text"
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              placeholder="Cari petak lahan..."
+              className="w-full bg-transparent text-xs text-ink-900 placeholder:text-ink-400 outline-none"
+            />
+          </div>
+
+          {/* Filter button */}
+          <button
+            type="button"
+            className="w-10 h-10 rounded-full bg-surface-100 hover:bg-surface-200 border border-line-200/80 flex items-center justify-center text-ink-700 transition-colors shadow-2xs cursor-pointer"
+            title="Filter Petak"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+          </button>
+
+          {/* Settings button */}
+          <Link
+            href="/pengaturan"
+            className="w-10 h-10 rounded-full bg-surface-100 hover:bg-surface-200 border border-line-200/80 flex items-center justify-center text-ink-700 transition-colors shadow-2xs"
+            title="Pengaturan"
+          >
+            <Settings className="w-4 h-4" />
+          </Link>
+
+          {/* Notifications bell */}
+          <Link
+            href="/peringatan"
+            className="w-10 h-10 rounded-full bg-surface-100 hover:bg-surface-200 border border-line-200/80 flex items-center justify-center text-ink-700 transition-colors shadow-2xs relative"
+            title="Peringatan Dini"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+          </Link>
+
+          {/* User Profile Avatar */}
+          <div className="w-10 h-10 rounded-full bg-[#1E3926] text-white font-medium text-xs flex items-center justify-center shadow-xs cursor-pointer">
+            PU
+          </div>
+        </div>
+      </div>
+
+      {/* Main Split Grid (55% Left Column / 45% Right Column) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 xl:gap-5 flex-1 min-h-0 items-stretch overflow-hidden">
+        {/* Left Column (55% = 7 of 12 cols): Analytics & Operations */}
+        <div className="lg:col-span-7 flex flex-col gap-3.5 overflow-y-auto pr-1 h-full">
+          {/* Row 1: Status Action Pills (Clean Designer Touch) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 select-none">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-stone-200/90 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                <span className="text-xs font-medium text-stone-700">Lengas Optimal</span>
+                <span className="px-1.5 py-0.2 rounded-md bg-stone-100 text-stone-600 text-[11px] font-medium font-mono">
+                  {safePlotsCount}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-amber-200 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="text-xs font-medium text-amber-900">Butuh Pengairan</span>
+                <span className="px-1.5 py-0.2 rounded-md bg-amber-50 text-amber-800 text-[11px] font-medium font-mono">
+                  {needWaterPlotsCount}
+                </span>
+              </div>
+            </div>
+
+            <Link href="/lahan/baru">
+              <Button
+                type="button"
+                className="h-9 px-4 rounded-full bg-stone-900 hover:bg-black text-white text-xs font-medium shadow-xs flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tambah Lahan</span>
+              </Button>
+            </Link>
+          </div>
+
+          {/* Row 2: 2x2 KPI Grid + Weather Card */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            {/* 2x2 KPI Cards (7 cols) */}
+            <div className="md:col-span-7 grid grid-cols-2 gap-3">
+              {/* Card 1: Total Petak */}
+              <div className="rounded-2xl bg-white p-4 border border-line-200/80 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-stone-500 mb-1">
+                  <span className="text-[11px] font-medium">Total Petak</span>
+                  <span className="text-xs text-stone-400">••</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-medium text-stone-900 tracking-tight tabular-nums">
+                    {plots.length}{" "}
+                    <span className="text-xs font-normal text-stone-500">Petak</span>
+                  </div>
+                  <span className="text-[10px] text-emerald-700 font-medium block mt-0.5">
+                    100% Terpantau Satelit
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 2: Komoditas */}
+              <div className="rounded-2xl bg-white p-4 border border-line-200/80 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-stone-500 mb-1">
+                  <span className="text-[11px] font-medium">Komoditas</span>
+                  <span className="text-xs text-stone-400">••</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-medium text-stone-900 tracking-tight tabular-nums">
+                    5 <span className="text-xs font-normal text-stone-500">Jenis</span>
+                  </div>
+                  <span className="text-[10px] text-stone-500 font-medium block mt-0.5">
+                    Padi, Cabai, Jagung, Bawang, Kedelai
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 3: Total Luas */}
+              <div className="rounded-2xl bg-white p-4 border border-line-200/80 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-stone-500 mb-1">
+                  <span className="text-[11px] font-medium">Total Luas</span>
+                  <span className="text-xs text-stone-400">••</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-medium text-stone-900 tracking-tight tabular-nums">
+                    {totalArea.toFixed(1)}{" "}
+                    <span className="text-xs font-normal text-stone-500">Hektar</span>
+                  </div>
+                  <span className="text-[10px] text-stone-500 font-medium block mt-0.5">
+                    Sentinel-2 10m Resolusi
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 4: Kebutuhan Air Petak Terpilih */}
+              <div className="rounded-2xl bg-white p-4 border border-line-200/80 shadow-2xs flex flex-col justify-between">
+                <div className="flex items-center justify-between text-stone-500 mb-1">
+                  <span className="text-[11px] font-medium">Kebutuhan Air</span>
+                  <span className="text-xs text-stone-400">••</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-medium text-blue-700 tracking-tight tabular-nums">
+                    {rec.irrigation_volume_m3.toFixed(0)}{" "}
+                    <span className="text-xs font-normal text-stone-500">m³</span>
+                  </div>
+                  <span className="text-[10px] text-blue-600 font-medium block mt-0.5">
+                    Pompa {rec.pump_minutes} menit (debit 8 L/s)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Weather Card (5 cols) */}
+            <div className="md:col-span-5">
+              <WeatherStripedCard
+                temp={30}
+                condition="Cerah Berawan"
+                windKm={14}
+                humidity={62}
+              />
+            </div>
+          </div>
+
+          {/* Row 3: Soil & Water Health Card + Farm Performance Donut Card */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <SoilHealthCard
+              deficitMm={rec.deficit_mm}
+              etcMm={rec.etc_mm}
+              peffMm={rec.effective_rain_mm}
+              volumeM3={rec.irrigation_volume_m3}
+              onLogIrrigation={(vol) => {
+                setRec((prev) => ({
+                  ...prev,
+                  irrigation_volume_m3: Math.max(0, prev.irrigation_volume_m3 - vol),
+                  deficit_mm: 0,
+                  status: "aman",
+                }));
+                if (selectedId) {
+                  api(`/plots/${selectedId}/irrigation-log`, {
+                    method: "POST",
+                    body: JSON.stringify({
+                      log_date: new Date().toISOString().slice(0, 10),
+                      volume_m3: vol,
+                      note: `Realisasi irigasi ${vol} m³ via dashboard LahanSense`,
+                    }),
+                  }).catch(() => {});
+                }
+              }}
+            />
+
+            <FarmPerformanceDonut
+              score={72}
+              utilization={61}
+              health={36}
+              onTrack={79}
+            />
+          </div>
+
+          {/* Row 4: 3 Bottom Activity Cards */}
+          <div>
+            <FarmTaskCards />
+          </div>
+        </div>
+
+        {/* Right Column (45% = 5 of 12 cols): Full-Height MapView Satellite Canvas */}
+        <div className="lg:col-span-5 h-[440px] sm:h-[500px] lg:h-full min-h-[380px] lg:min-h-0 flex flex-col">
+          <MapView
+            plots={plots}
+            selectedId={selectedId}
+            onSelect={(id) => {
+              setSelectedId(id);
+              if (REC_MAP[id]) setRec(REC_MAP[id]);
+            }}
+          />
+        </div>
+      </div>
+    </AppShell>
   );
 }

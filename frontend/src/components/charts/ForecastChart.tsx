@@ -7,7 +7,7 @@ export default function ForecastChart({ data }: { data: ForecastDay[] }) {
   const rows = data.map((d) => ({ ...d, label: d.date.slice(5) }));
   return (
     <div className="rounded-lg border bg-white p-4">
-      <h3 className="mb-2 font-semibold">Defisit & hujan 7 hari</h3>
+      <h3 className="mb-2 font-medium">Defisit & hujan 7 hari</h3>
       <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={rows}>

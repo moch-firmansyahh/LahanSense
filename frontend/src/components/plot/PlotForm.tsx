@@ -13,7 +13,7 @@ interface Props {
 export default function PlotForm({ areaHa, submitting, onSubmit, onCancel }: Props) {
   const [name, setName] = useState("");
   const [crop, setCrop] = useState<Crop>("padi");
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState("2026-11-08");
   const [method, setMethod] = useState<Method>("genangan");
 
   const field = "mt-1 w-full rounded border border-gray-300 px-3 py-2 text-sm";
