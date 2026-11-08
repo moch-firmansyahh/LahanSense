@@ -49,7 +49,7 @@ test.describe("LahanSense Full Feature End-to-End Suite", () => {
     await expect(page.locator("text=Kebutuhan Air").first()).toBeVisible();
 
     // 1.6 Weather Card & Soil Health
-    await expect(page.locator("text=Cerah Berawan").first()).toBeVisible();
+    await expect(page.locator("text=Cuaca Hari Ini").first()).toBeVisible();
     await expect(page.locator("text=Kesehatan Tanah & Air").first()).toBeVisible();
   });
 
@@ -146,6 +146,15 @@ test.describe("LahanSense Full Feature End-to-End Suite", () => {
     await expect(page.locator("button:has-text('Semua')").first()).toBeVisible();
     await expect(page.locator("button:has-text('Padi')").first()).toBeVisible();
     await expect(page.locator("button:has-text('Cabai')").first()).toBeVisible();
+
+    // 6.3 Detail Lahan & Modal Kondisi Tanah & Satelit
+    await page.goto("/lahan/1");
+    await expect(page.locator("text=Kondisi Tanah & Satelit").first()).toBeVisible();
+    const detailBtn = page.locator("button:has-text('Lihat Detail')").first();
+    await expect(detailBtn).toBeVisible();
+    await detailBtn.click();
+    await expect(page.locator("text=Rincian Biofisik Tanah & Spektral Satelit").first()).toBeVisible();
+    await page.locator("button:has-text('Tutup')").first().click();
   });
 
   test("7. Pendaftaran Lahan Baru (/lahan/baru): Multi-step Form & GPS", async ({ page }) => {

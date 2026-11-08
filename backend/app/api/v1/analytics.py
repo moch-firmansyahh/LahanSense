@@ -64,6 +64,45 @@ def forecast(plot_id: int, db: Session = Depends(get_db)):
     return build_forecast(plot, weather, date.today())
 
 
+@router.get("/{plot_id}/weather")
+def plot_weather(plot_id: int, db: Session = Depends(get_db)):
+    plot = get_plot_or_404(db, plot_id)
+    weather_days = fetch_daily_weather(plot.centroid_lat, plot.centroid_lng)
+    today_str = date.today().isoformat()
+    today_w = next((w for w in weather_days if w["date"] == today_str), weather_days[0] if weather_days else None)
+
+    t_max = today_w["t_max"] if today_w else 31.0
+    t_min = today_w["t_min"] if today_w else 24.0
+    rain = today_w["rain_mm"] if today_w else 0.0
+
+    temp = round((t_max * 2 + t_min) / 3)
+    if rain >= 20.0:
+        cond = "Hujan Lebat"
+    elif rain >= 5.0:
+        cond = "Hujan Ringan"
+    elif temp <= 23:
+        cond = "Sejuk Berkabut" if rain > 0 else "Sejuk Berawan"
+    elif temp >= 33:
+        cond = "Panas Terik"
+    else:
+        cond = "Cerah Berawan"
+
+    humidity = 85 if temp <= 23 else (54 if temp >= 33 else 64)
+    wind_kmh = 9 if temp <= 23 else (17 if temp >= 33 else 14)
+
+    return {
+        "plot_id": plot.id,
+        "location": plot.name.replace(" (demo)", "").strip(),
+        "temp": temp,
+        "condition": cond,
+        "wind_kmh": wind_kmh,
+        "humidity": humidity,
+        "t_min": round(t_min),
+        "t_max": round(t_max),
+        "rain_mm": rain,
+    }
+
+
 @router.get("/{plot_id}/alerts", response_model=list[AlertOut])
 def alerts(plot_id: int, db: Session = Depends(get_db)):
     plot = get_plot_or_404(db, plot_id)

@@ -411,6 +411,161 @@ const FALLBACK_PLOTS: Plot[] = [
   },
 ];
 
+// Peta Cuaca Mikroiklim Per Wilayah Pertanian
+const PLOT_WEATHER_MAP: Record<number, {
+  location: string;
+  temp: number;
+  condition: string;
+  windKm: number;
+  humidity: number;
+  tMin: number;
+  tMax: number;
+}> = {
+  1: {
+    location: "Karawang, Jawa Barat",
+    temp: 31,
+    condition: "Cerah Berawan",
+    windKm: 14,
+    humidity: 62,
+    tMin: 25,
+    tMax: 33,
+  },
+  2: {
+    location: "Lembang, Bandung Barat",
+    temp: 22,
+    condition: "Sejuk Berkabut",
+    windKm: 9,
+    humidity: 82,
+    tMin: 16,
+    tMax: 24,
+  },
+  3: {
+    location: "Gunungkidul, DI Yogyakarta",
+    temp: 32,
+    condition: "Cerah Terik",
+    windKm: 18,
+    humidity: 52,
+    tMin: 23,
+    tMax: 34,
+  },
+  4: {
+    location: "Brebes, Jawa Tengah",
+    temp: 34,
+    condition: "Panas Terik",
+    windKm: 16,
+    humidity: 58,
+    tMin: 26,
+    tMax: 36,
+  },
+  5: {
+    location: "Pangalengan, Jawa Barat",
+    temp: 20,
+    condition: "Hujan Ringan",
+    windKm: 11,
+    humidity: 86,
+    tMin: 15,
+    tMax: 22,
+  },
+  6: {
+    location: "Grobogan, Jawa Tengah",
+    temp: 33,
+    condition: "Cerah Berawan",
+    windKm: 15,
+    humidity: 56,
+    tMin: 24,
+    tMax: 35,
+  },
+  7: {
+    location: "Subang, Jawa Barat",
+    temp: 30,
+    condition: "Cerah Berawan",
+    windKm: 13,
+    humidity: 66,
+    tMin: 24,
+    tMax: 32,
+  },
+  8: {
+    location: "Malang, Jawa Timur",
+    temp: 24,
+    condition: "Sejuk Berawan",
+    windKm: 10,
+    humidity: 74,
+    tMin: 18,
+    tMax: 26,
+  },
+  9: {
+    location: "Nganjuk, Jawa Timur",
+    temp: 33,
+    condition: "Cerah Terik",
+    windKm: 17,
+    humidity: 55,
+    tMin: 24,
+    tMax: 35,
+  },
+  10: {
+    location: "Magelang, Jawa Tengah",
+    temp: 26,
+    condition: "Cerah Sejuk",
+    windKm: 12,
+    humidity: 70,
+    tMin: 20,
+    tMax: 28,
+  },
+};
+
+function resolvePlotWeather(plot?: Plot) {
+  if (!plot) return PLOT_WEATHER_MAP[1];
+  if (PLOT_WEATHER_MAP[plot.id]) return PLOT_WEATHER_MAP[plot.id];
+
+  const name = plot.name.toLowerCase();
+  const lat = plot.centroid?.lat ?? -6.2;
+  const lng = plot.centroid?.lng ?? 107.3;
+
+  if (name.includes("lembang") || name.includes("pangalengan") || (-7.25 <= lat && lat <= -6.75 && 107.5 <= lng && lng <= 107.7)) {
+    return {
+      location: plot.name.replace(/ \(demo\)/i, "").trim(),
+      temp: 22,
+      condition: "Sejuk Berkabut",
+      windKm: 9,
+      humidity: 82,
+      tMin: 16,
+      tMax: 24,
+    };
+  }
+  if (name.includes("gunung") || name.includes("kidul") || (-8.1 <= lat && lat <= -7.8 && 110.4 <= lng && lng <= 110.8)) {
+    return {
+      location: plot.name.replace(/ \(demo\)/i, "").trim(),
+      temp: 32,
+      condition: "Cerah Terik",
+      windKm: 18,
+      humidity: 52,
+      tMin: 23,
+      tMax: 34,
+    };
+  }
+  if (name.includes("jakarta") || (106.6 <= lng && lng <= 107.0 && -6.4 <= lat && lat <= -6.1)) {
+    return {
+      location: "DKI Jakarta",
+      temp: 33,
+      condition: "Panas Berawan",
+      windKm: 13,
+      humidity: 72,
+      tMin: 26,
+      tMax: 34,
+    };
+  }
+
+  return {
+    location: plot.name.replace(/ \(demo\)/i, "").trim(),
+    temp: 30,
+    condition: "Cerah Berawan",
+    windKm: 14,
+    humidity: 62,
+    tMin: 25,
+    tMax: 33,
+  };
+}
+
 export default function HomePage() {
   const [plots, setPlots] = useState<Plot[]>(FALLBACK_PLOTS);
   const [selectedId, setSelectedId] = useState<number | null>(1);
@@ -419,6 +574,43 @@ export default function HomePage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [cropFilter, setCropFilter] = useState<string>("all");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [weatherData, setWeatherData] = useState(() => PLOT_WEATHER_MAP[1]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const fallbackW = resolvePlotWeather(plots.find((p) => p.id === selectedId));
+    setWeatherData(fallbackW);
+
+    let cancelled = false;
+    api<{
+      plot_id: number;
+      location: string;
+      temp: number;
+      condition: string;
+      wind_kmh: number;
+      humidity: number;
+      t_min: number;
+      t_max: number;
+    }>(`/plots/${selectedId}/weather`)
+      .then((w) => {
+        if (!cancelled && w) {
+          setWeatherData({
+            location: fallbackW.location || w.location,
+            temp: w.temp,
+            condition: w.condition,
+            windKm: w.wind_kmh,
+            humidity: w.humidity,
+            tMin: w.t_min,
+            tMax: w.t_max,
+          });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedId, plots]);
 
   useEffect(() => {
     let cancelled = false;
@@ -902,10 +1094,13 @@ export default function HomePage() {
             {/* Weather Card (5 cols) */}
             <div className="md:col-span-5">
               <WeatherStripedCard
-                temp={30}
-                condition="Cerah Berawan"
-                windKm={14}
-                humidity={62}
+                location={weatherData.location}
+                temp={weatherData.temp}
+                condition={weatherData.condition}
+                windKm={weatherData.windKm}
+                humidity={weatherData.humidity}
+                tMin={weatherData.tMin}
+                tMax={weatherData.tMax}
               />
             </div>
           </div>
