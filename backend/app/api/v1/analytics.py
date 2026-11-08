@@ -16,7 +16,7 @@ from app.schemas.analytics import (
     NdviObservationOut,
     RecommendationOut,
 )
-from app.services.alerts import build_alerts, build_forecast
+from app.services.alerts import build_alerts, build_forecast, format_whatsapp_alert
 from app.services.efficiency import calculate_irrigation_efficiency
 from app.services.satellite import get_or_create_ndvi_for_plot
 from app.services.water_balance import compute_day
@@ -69,6 +69,38 @@ def alerts(plot_id: int, db: Session = Depends(get_db)):
     plot = get_plot_or_404(db, plot_id)
     weather = fetch_daily_weather(plot.centroid_lat, plot.centroid_lng)
     return build_alerts(build_forecast(plot, weather, date.today()))
+
+
+@router.get("/{plot_id}/alerts/whatsapp")
+def alerts_whatsapp(
+    plot_id: int,
+    phone: str = Query("08112222136", description="Nomor WhatsApp penerima siaga"),
+    db: Session = Depends(get_db),
+):
+    plot = get_plot_or_404(db, plot_id)
+    weather = fetch_daily_weather(plot.centroid_lat, plot.centroid_lng)
+    forecast = build_forecast(plot, weather, date.today())
+    alerts_list = build_alerts(forecast)
+    if alerts_list:
+        first = alerts_list[0]
+        return format_whatsapp_alert(
+            plot_name=plot.name,
+            crop=plot.crop,
+            alert_type=first["type"],
+            severity=first["severity"],
+            message=first["message"],
+            suggested_action=first["suggested_action"],
+            phone=phone,
+        )
+    return format_whatsapp_alert(
+        plot_name=plot.name,
+        crop=plot.crop,
+        alert_type="status_harian",
+        severity="aman",
+        message="Kelengasan tanah dalam batas aman, tidak ada risiko kekeringan 3 hari kedepan.",
+        suggested_action="Lanjutkan rutinitas pemantauan kanopi tanaman secara berkala.",
+        phone=phone,
+    )
 
 
 @router.get("/{plot_id}/ndvi", response_model=NdviHistoryOut)

@@ -300,6 +300,32 @@ def test_early_warning_engine():
         f"Pesan: {alerts_storm[0]['message'] if alerts_storm else 'None'}",
     )
 
+    # 5.3 Otomasi Pengiriman Peringatan Dini WhatsApp ke 08112222136
+    from app.services.alerts import format_whatsapp_alert
+    wa_payload = format_whatsapp_alert(
+        plot_name="Blok A1 - Sawah Utama",
+        crop="padi",
+        alert_type="kekeringan",
+        severity="kritis",
+        message="Defisit air kumulatif 14.5 mm dalam 3 hari ke depan.",
+        suggested_action="Nyalakan pompa selama 60 menit debit 8 L/detik.",
+        phone="08112222136",
+    )
+    is_wa_valid = (
+        wa_payload["target_phone"] == "08112222136"
+        and wa_payload["wa_phone"] == "628112222136"
+        and "https://wa.me/628112222136?text=" in wa_payload["wa_url"]
+        and "08112222136" in wa_payload["message"]
+        and "KRITIS" in wa_payload["message"]
+        and wa_payload["status"] == "ready"
+    )
+    log_test(
+        "Peringatan",
+        "Otomasi Pengiriman Peringatan Dini WhatsApp ke 08112222136",
+        is_wa_valid,
+        f"Format URL wa.me: {wa_payload['wa_url'][:55]}... (Target: {wa_payload['wa_phone']})",
+    )
+
 
 def test_water_and_cost_audit_engine():
     section("MODUL 6: ENGINE AUDIT EFISIENSI AIR & PENGHEMATAN BIAYA")

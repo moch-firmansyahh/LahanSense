@@ -19,7 +19,7 @@ export default function WeekTimeline({ forecast }: WeekTimelineProps) {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-normal text-ink-900 flex items-center gap-2">
           <span>Peringatan Dini 7 Hari</span>
-          {hasAlert && <span className="w-2 h-2 rounded-full bg-warn-500 animate-ping" />}
+          {hasAlert && <span className="w-2 h-2 rounded-full bg-warn-500" />}
         </h3>
         <Link
           href="/peringatan"

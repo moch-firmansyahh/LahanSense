@@ -54,7 +54,7 @@ export default function HeroRecommendation({
         {/* Header: Label & Status Badge */}
         <div className="relative z-10 flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-lime-400" />
             <h3 className="text-xs md:text-sm font-medium tracking-wide text-primary-100">
               Rekomendasi Hari Ini · {plotName}
             </h3>

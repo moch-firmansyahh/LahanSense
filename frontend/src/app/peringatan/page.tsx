@@ -634,7 +634,7 @@ export default function PeringatanPage() {
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-xs font-medium text-stone-800">Otomatisasi Peringatan Dini WhatsApp</h3>
                 <span className="inline-flex items-center gap-1 text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Otomatis Aktif
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Otomatis Aktif
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 mt-0.5 font-normal">

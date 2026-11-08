@@ -30,6 +30,7 @@
     "terra-draw-maplibre-gl-adapter": "^1.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

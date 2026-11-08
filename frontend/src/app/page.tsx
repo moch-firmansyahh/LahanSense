@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import AppShell from "@/components/layout/AppShell";
 import FarmPerformanceDonut from "@/components/features/FarmPerformanceDonut";
@@ -37,6 +37,7 @@ import {
   SlidersHorizontal,
   Settings,
   Plus,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import type { Plot, Recommendation } from "@/types/api";
@@ -415,6 +416,9 @@ export default function HomePage() {
   const [selectedId, setSelectedId] = useState<number | null>(1);
   const [rec, setRec] = useState<Recommendation>(DEFAULT_REC);
   const [searchVal, setSearchVal] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [cropFilter, setCropFilter] = useState<string>("all");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -446,6 +450,42 @@ export default function HomePage() {
     };
   }, [selectedId]);
 
+  // Active filter count
+  const activeFilterCount = (statusFilter !== "all" ? 1 : 0) + (cropFilter !== "all" ? 1 : 0);
+
+  // Filtered plots based on search query AND filters
+  const filteredPlots = useMemo(() => {
+    return plots.filter((p) => {
+      const q = searchVal.trim().toLowerCase();
+      const matchesSearch =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.crop.toLowerCase().includes(q);
+
+      const pStatus = (REC_MAP[p.id]?.status ?? "aman").toLowerCase();
+      const matchesStatus =
+        statusFilter === "all" || pStatus === statusFilter.toLowerCase();
+
+      const matchesCrop =
+        cropFilter === "all" || p.crop.toLowerCase() === cropFilter.toLowerCase();
+
+      return matchesSearch && matchesStatus && matchesCrop;
+    });
+  }, [plots, searchVal, statusFilter, cropFilter]);
+
+  function handleSelectPlot(id: number) {
+    setSelectedId(id);
+    if (REC_MAP[id]) setRec(REC_MAP[id]);
+    setIsSearchOpen(false);
+  }
+
+  function handleResetFilter() {
+    setStatusFilter("all");
+    setCropFilter("all");
+    setSearchVal("");
+    setIsSearchOpen(false);
+  }
+
   const selectedPlot = plots.find((p) => p.id === selectedId) || plots[0];
   const totalArea = plots.reduce((acc, p) => acc + p.area_ha, 0);
   const safePlotsCount = plots.filter((p) => (REC_MAP[p.id]?.status ?? "aman") === "aman").length;
@@ -461,7 +501,7 @@ export default function HomePage() {
             Lahan Saya
           </h1>
 
-          {/* Parcel Dropdown Selector (Supports all 6 Demo Parcels) */}
+          {/* Parcel Dropdown Selector (Supports all Demo Parcels) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -473,20 +513,26 @@ export default function HomePage() {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-72">
-              <DropdownMenuLabel className="font-medium text-stone-800 text-xs">Pilih Petak Lahan untuk Monitoring</DropdownMenuLabel>
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <DropdownMenuLabel className="p-0 font-medium text-stone-800 text-xs">
+                  Pilih Petak Lahan
+                </DropdownMenuLabel>
+                {(activeFilterCount > 0 || searchVal) && (
+                  <span className="text-[10px] text-emerald-700 font-normal">
+                    {filteredPlots.length} dari {plots.length}
+                  </span>
+                )}
+              </div>
               <DropdownMenuSeparator />
-              {plots.map((p) => {
+              {(filteredPlots.length > 0 ? filteredPlots : plots).map((p) => {
                 const isSelected = p.id === selectedId;
                 const plotRec = REC_MAP[p.id] || DEFAULT_REC;
                 return (
                   <DropdownMenuItem
                     key={p.id}
-                    onClick={() => {
-                      setSelectedId(p.id);
-                      if (REC_MAP[p.id]) setRec(REC_MAP[p.id]);
-                    }}
+                    onClick={() => handleSelectPlot(p.id)}
                     className={`flex items-center justify-between py-2 cursor-pointer ${
-                      isSelected ? "bg-emerald-950 text-white font-medium" : "text-stone-700"
+                      isSelected ? "bg-emerald-700 text-white font-medium" : "text-stone-700"
                     }`}
                   >
                     <div className="flex flex-col min-w-0">
@@ -495,7 +541,7 @@ export default function HomePage() {
                         {p.crop} · {p.area_ha.toFixed(2)} ha · {plotRec.status}
                       </span>
                     </div>
-                    {isSelected && <Check className="w-4 h-4 ml-2 text-emerald-400 shrink-0" />}
+                    {isSelected && <Check className="w-4 h-4 ml-2 text-white shrink-0" />}
                   </DropdownMenuItem>
                 );
               })}
@@ -505,26 +551,204 @@ export default function HomePage() {
 
         {/* Right: Search, Filter, Settings, Notifications, Profile */}
         <div className="flex items-center gap-2.5">
-          {/* Search Pill */}
-          <div className="flex items-center w-48 sm:w-60 h-10 px-3.5 rounded-full bg-surface-100 border border-line-200/80 focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-600/20 transition-all shadow-2xs">
-            <Search className="w-4 h-4 text-ink-400 mr-2 shrink-0" />
-            <input
-              type="text"
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              placeholder="Cari petak lahan..."
-              className="w-full bg-transparent text-xs text-ink-900 placeholder:text-ink-400 outline-none"
-            />
+          {/* Search Pill with Live Autosuggest */}
+          <div className="relative">
+            <div className="flex items-center w-48 sm:w-60 h-10 px-3.5 rounded-full bg-surface-100 border border-line-200/80 focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-600/20 transition-all shadow-2xs">
+              <Search className="w-4 h-4 text-ink-400 mr-2 shrink-0" />
+              <input
+                type="text"
+                value={searchVal}
+                onChange={(e) => {
+                  setSearchVal(e.target.value);
+                  setIsSearchOpen(true);
+                }}
+                onFocus={() => {
+                  if (searchVal.trim().length > 0) setIsSearchOpen(true);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && filteredPlots.length > 0) {
+                    handleSelectPlot(filteredPlots[0].id);
+                  }
+                  if (e.key === "Escape") {
+                    setIsSearchOpen(false);
+                  }
+                }}
+                placeholder="Cari petak lahan..."
+                className="w-full bg-transparent text-xs text-ink-900 placeholder:text-ink-400 outline-none"
+              />
+              {searchVal && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchVal("");
+                    setIsSearchOpen(false);
+                  }}
+                  className="w-4 h-4 text-stone-400 hover:text-stone-700 shrink-0 ml-1 cursor-pointer"
+                  title="Hapus pencarian"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Autosuggest Dropdown Overlay */}
+            {isSearchOpen && searchVal.trim().length > 0 && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsSearchOpen(false)}
+                />
+                <div className="absolute top-full mt-2 left-0 w-72 sm:w-80 bg-white border border-stone-200/90 rounded-2xl shadow-xl p-2 z-50">
+                  <div className="px-2 py-1 text-[11px] font-medium text-stone-500 flex items-center justify-between border-b border-stone-100 pb-1.5 mb-1.5">
+                    <span>Hasil Pencarian ({filteredPlots.length})</span>
+                    <span className="text-[10px] text-stone-400">Tekan Enter / klik</span>
+                  </div>
+                  <div className="max-h-60 overflow-y-auto flex flex-col gap-1">
+                    {filteredPlots.length > 0 ? (
+                      filteredPlots.map((p) => {
+                        const pRec = REC_MAP[p.id] || DEFAULT_REC;
+                        const isSelected = p.id === selectedId;
+                        const isKritis = pRec.status === "kritis";
+                        const isWaspada = pRec.status === "waspada";
+
+                        return (
+                          <button
+                            key={p.id}
+                            type="button"
+                            onClick={() => handleSelectPlot(p.id)}
+                            className={`w-full text-left px-2.5 py-2 rounded-xl flex items-center justify-between transition-colors cursor-pointer ${
+                              isSelected
+                                ? "bg-emerald-50 text-emerald-950 border border-emerald-200"
+                                : "hover:bg-stone-50 text-stone-800"
+                            }`}
+                          >
+                            <div className="flex flex-col min-w-0 pr-2">
+                              <span className="text-xs font-medium truncate">{p.name}</span>
+                              <span className="text-[10px] text-stone-500 capitalize">
+                                {p.crop} · {p.area_ha.toFixed(2)} ha
+                              </span>
+                            </div>
+                            <span
+                              className={`text-[9px] px-2 py-0.5 rounded-full font-medium shrink-0 uppercase ${
+                                isKritis
+                                  ? "bg-rose-100 text-rose-700"
+                                  : isWaspada
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-emerald-100 text-emerald-700"
+                              }`}
+                            >
+                              {pRec.status}
+                            </span>
+                          </button>
+                        );
+                      })
+                    ) : (
+                      <div className="py-4 text-center text-xs text-stone-500">
+                        Tidak ada petak bernama &ldquo;{searchVal}&rdquo;
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Filter button */}
-          <button
-            type="button"
-            className="w-10 h-10 rounded-full bg-surface-100 hover:bg-surface-200 border border-line-200/80 flex items-center justify-center text-ink-700 transition-colors shadow-2xs cursor-pointer"
-            title="Filter Petak"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-          </button>
+          {/* Filter Popover Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className={`relative w-10 h-10 rounded-full border transition-colors shadow-2xs flex items-center justify-center cursor-pointer ${
+                  activeFilterCount > 0
+                    ? "bg-emerald-100 border-emerald-400 text-emerald-800"
+                    : "bg-surface-100 hover:bg-surface-200 border-line-200/80 text-ink-700"
+                }`}
+                title="Filter Petak Lahan"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] font-medium flex items-center justify-center shadow-xs">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 p-2.5">
+              <div className="flex items-center justify-between pb-2 border-b border-stone-100 mb-2">
+                <span className="text-xs font-medium text-stone-900">Filter Petak</span>
+                {activeFilterCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleResetFilter}
+                    className="text-[10px] text-emerald-700 hover:text-emerald-800 font-medium cursor-pointer"
+                  >
+                    Reset Filter
+                  </button>
+                )}
+              </div>
+
+              {/* Section 1: Status Irigasi */}
+              <div className="mb-2.5">
+                <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider block mb-1.5">
+                  Status Irigasi
+                </span>
+                <div className="grid grid-cols-2 gap-1">
+                  {[
+                    { id: "all", label: "Semua" },
+                    { id: "aman", label: "Aman" },
+                    { id: "waspada", label: "Waspada" },
+                    { id: "kritis", label: "Kritis" },
+                  ].map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setStatusFilter(s.id)}
+                      className={`px-2 py-1.5 rounded-lg text-xs font-normal transition-colors cursor-pointer text-left flex items-center justify-between ${
+                        statusFilter === s.id
+                          ? "bg-emerald-700 text-white font-medium"
+                          : "bg-stone-50 hover:bg-stone-100 text-stone-700"
+                      }`}
+                    >
+                      <span>{s.label}</span>
+                      {statusFilter === s.id && <Check className="w-3 h-3" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <DropdownMenuSeparator className="my-2" />
+
+              {/* Section 2: Komoditas */}
+              <div>
+                <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider block mb-1.5">
+                  Komoditas Tanaman
+                </span>
+                <div className="flex flex-col gap-1">
+                  {[
+                    { id: "all", label: "Semua Komoditas" },
+                    { id: "padi", label: "Padi Sawah" },
+                    { id: "cabai", label: "Cabai Rawit / Merah" },
+                    { id: "jagung", label: "Jagung Hibrida" },
+                    { id: "bawang_merah", label: "Bawang Merah" },
+                  ].map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setCropFilter(c.id)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-normal transition-colors cursor-pointer text-left flex items-center justify-between ${
+                        cropFilter === c.id
+                          ? "bg-emerald-700 text-white font-medium"
+                          : "hover:bg-stone-50 text-stone-700"
+                      }`}
+                    >
+                      <span>{c.label}</span>
+                      {cropFilter === c.id && <Check className="w-3 h-3" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Settings button */}
           <Link
@@ -558,7 +782,7 @@ export default function HomePage() {
         <div className="lg:col-span-7 flex flex-col gap-3.5 overflow-y-auto pr-1 h-full">
           {/* Row 1: Status Action Pills (Clean Designer Touch) */}
           <div className="flex flex-wrap items-center justify-between gap-3 select-none">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-stone-200/90 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-600" />
                 <span className="text-xs font-medium text-stone-700">Lengas Optimal</span>
@@ -568,12 +792,28 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-amber-200 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
                 <span className="text-xs font-medium text-amber-900">Butuh Pengairan</span>
                 <span className="px-1.5 py-0.2 rounded-md bg-amber-50 text-amber-800 text-[11px] font-medium font-mono">
                   {needWaterPlotsCount}
                 </span>
               </div>
+
+              {/* Active Filter Pill */}
+              {(activeFilterCount > 0 || searchVal) && (
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs">
+                  <span>
+                    Filter: {filteredPlots.length} dari {plots.length} petak
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleResetFilter}
+                    className="ml-1 text-[11px] text-emerald-700 hover:text-emerald-900 font-medium underline cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                </div>
+              )}
             </div>
 
             <Link href="/lahan/baru">
@@ -714,12 +954,9 @@ export default function HomePage() {
         {/* Right Column (45% = 5 of 12 cols): Full-Height MapView Satellite Canvas */}
         <div className="lg:col-span-5 h-[440px] sm:h-[500px] lg:h-full min-h-[380px] lg:min-h-0 flex flex-col">
           <MapView
-            plots={plots}
+            plots={filteredPlots.length > 0 ? filteredPlots : plots}
             selectedId={selectedId}
-            onSelect={(id) => {
-              setSelectedId(id);
-              if (REC_MAP[id]) setRec(REC_MAP[id]);
-            }}
+            onSelect={handleSelectPlot}
           />
         </div>
       </div>

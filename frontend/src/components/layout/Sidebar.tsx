@@ -58,13 +58,13 @@ export default function Sidebar({
   const pathname = usePathname();
 
   const sidebarContent = (
-    <div className="flex flex-col justify-between h-full w-full select-none text-stone-800 py-3.5 px-2 bg-[#FAF8F5] overflow-hidden">
-      {/* Top Header: Logo (Stable structure - No Jump) */}
-      <div className="flex items-center justify-between px-1 shrink-0 pb-3 border-b border-stone-200/60 overflow-hidden">
+    <div className="flex flex-col justify-between h-full w-full select-none text-stone-800 py-3.5 px-3 bg-[#FAF8F5] overflow-hidden">
+      {/* Top Header: Logo (Stable structure - Perfectly aligned with nav items below) */}
+      <div className="flex items-center shrink-0 pb-3 border-b border-stone-200/60 overflow-hidden">
         <Link
           href="/"
           onClick={onCloseMobile}
-          className="flex items-center group focus:outline-hidden min-w-0"
+          className="flex items-center group focus:outline-hidden w-full h-10 min-w-0"
           title="Beranda LahanSense"
           aria-label="Beranda LahanSense"
         >
@@ -80,8 +80,10 @@ export default function Sidebar({
           </div>
 
           <div
-            className={`flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out ${
-              isOpen ? "opacity-100 max-w-[160px] ml-2.5" : "opacity-0 max-w-0 ml-0 pointer-events-none"
+            className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex flex-col justify-center min-w-0 ${
+              isOpen
+                ? "opacity-100 max-w-[160px] ml-2.5"
+                : "opacity-0 max-w-0 ml-0 pointer-events-none"
             }`}
           >
             <span className="text-base font-medium text-stone-900 tracking-tight leading-tight whitespace-nowrap">
@@ -97,7 +99,9 @@ export default function Sidebar({
         <button
           type="button"
           onClick={onCloseMobile}
-          className="md:hidden w-8 h-8 rounded-xl bg-stone-100 text-stone-700 flex items-center justify-center shrink-0"
+          className={`${
+            isOpen ? "md:hidden flex" : "hidden"
+          } w-8 h-8 rounded-xl bg-stone-100 text-stone-700 items-center justify-center shrink-0 ml-auto`}
           title="Tutup Menu"
           aria-label="Tutup Menu"
         >
@@ -107,7 +111,7 @@ export default function Sidebar({
 
       {/* Middle Navigation (Stable, smooth gliding labels - No Jump) */}
       <div className="flex-1 my-3 flex flex-col justify-between overflow-y-auto overflow-x-hidden">
-        <nav className="flex flex-col gap-1 px-0.5">
+        <nav className="flex flex-col gap-1.5">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             const IconComponent = item.icon;
@@ -119,24 +123,26 @@ export default function Sidebar({
                 prefetch={false}
                 onClick={onCloseMobile}
                 title={item.label}
-                className={`flex items-center h-10 px-2 rounded-xl text-xs font-medium transition-colors duration-150 overflow-hidden ${
+                className={`group flex items-center h-10 w-full rounded-xl text-xs font-medium transition-colors duration-200 overflow-hidden ${
                   isActive
-                    ? "bg-emerald-950 text-white shadow-2xs"
-                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/90"
+                    ? "bg-emerald-700 text-white shadow-sm shadow-emerald-900/15"
+                    : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/70"
                 }`}
                 aria-label={item.label}
               >
-                <div className="w-7 h-7 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 flex items-center justify-center shrink-0">
                   <IconComponent
-                    className={`w-4 h-4 stroke-[2] ${
-                      isActive ? "text-emerald-400" : "text-stone-500"
+                    className={`w-[18px] h-[18px] stroke-[2] transition-colors ${
+                      isActive ? "text-white" : "text-stone-500 group-hover:text-stone-800"
                     }`}
                     aria-hidden="true"
                   />
                 </div>
                 <div
-                  className={`overflow-hidden transition-all duration-300 ease-out flex items-center ${
-                    isOpen ? "opacity-100 max-w-[160px] ml-2" : "opacity-0 max-w-0 ml-0 pointer-events-none"
+                  className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
+                    isOpen
+                      ? "opacity-100 max-w-[160px] ml-1"
+                      : "opacity-0 max-w-0 ml-0 pointer-events-none"
                   }`}
                 >
                   <span className="truncate whitespace-nowrap text-xs font-medium">
@@ -147,56 +153,35 @@ export default function Sidebar({
             );
           })}
         </nav>
-
-        {/* Center Toggle Button in Middle Area (Pindah ke Tengah) */}
-        <div className="pt-2 px-0.5">
-          <button
-            type="button"
-            onClick={onToggle}
-            className="hidden md:flex items-center h-10 w-full px-2 rounded-xl bg-stone-100 hover:bg-stone-200/90 text-stone-600 hover:text-stone-900 transition-colors cursor-pointer border border-stone-200/70 overflow-hidden"
-            title={isOpen ? "Ciutkan Sidebar" : "Perluas Sidebar"}
-            aria-label={isOpen ? "Ciutkan Sidebar" : "Perluas Sidebar"}
-          >
-            <div className="w-7 h-7 flex items-center justify-center shrink-0">
-              {isOpen ? (
-                <PanelLeftClose className="w-4 h-4 text-stone-500" aria-hidden="true" />
-              ) : (
-                <PanelLeftOpen className="w-4 h-4 text-stone-500" aria-hidden="true" />
-              )}
-            </div>
-            <div
-              className={`overflow-hidden transition-all duration-300 ease-out flex items-center ${
-                isOpen ? "opacity-100 max-w-[160px] ml-2" : "opacity-0 max-w-0 ml-0 pointer-events-none"
-              }`}
-            >
-              <span className="truncate whitespace-nowrap text-xs font-medium">
-                Ciutkan Menu
-              </span>
-            </div>
-          </button>
-        </div>
       </div>
 
       {/* Bottom Section: Settings & User Profile (Stable - No Jump) */}
-      <div className="shrink-0 flex flex-col gap-1.5 pt-3 border-t border-stone-200/60 px-0.5 overflow-hidden">
+      <div className="shrink-0 flex flex-col gap-1.5 pt-3 border-t border-stone-200/60 overflow-hidden">
         <Link
           href="/pengaturan"
           prefetch={false}
           onClick={onCloseMobile}
           title="Pengaturan"
-          className={`flex items-center h-10 px-2 rounded-xl text-xs font-medium transition-colors duration-150 overflow-hidden ${
+          className={`group flex items-center h-10 w-full rounded-xl text-xs font-medium transition-colors duration-200 overflow-hidden ${
             pathname === "/pengaturan"
-              ? "bg-emerald-950 text-white shadow-2xs"
-              : "text-stone-600 hover:text-stone-900 hover:bg-stone-100/90"
+              ? "bg-emerald-700 text-white shadow-sm shadow-emerald-900/15"
+              : "text-stone-600 hover:text-stone-900 hover:bg-stone-200/70"
           }`}
           aria-label="Pengaturan"
         >
-          <div className="w-7 h-7 flex items-center justify-center shrink-0">
-            <Settings className="w-4 h-4 stroke-[2] text-stone-500" aria-hidden="true" />
+          <div className="w-10 h-10 flex items-center justify-center shrink-0">
+            <Settings
+              className={`w-[18px] h-[18px] stroke-[2] transition-colors ${
+                pathname === "/pengaturan" ? "text-white" : "text-stone-500 group-hover:text-stone-800"
+              }`}
+              aria-hidden="true"
+            />
           </div>
           <div
-            className={`overflow-hidden transition-all duration-300 ease-out flex items-center ${
-              isOpen ? "opacity-100 max-w-[160px] ml-2" : "opacity-0 max-w-0 ml-0 pointer-events-none"
+            className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex items-center ${
+              isOpen
+                ? "opacity-100 max-w-[160px] ml-1"
+                : "opacity-0 max-w-0 ml-0 pointer-events-none"
             }`}
           >
             <span className="truncate whitespace-nowrap text-xs font-medium">
@@ -210,15 +195,19 @@ export default function Sidebar({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              className="flex items-center h-10 px-2 rounded-xl bg-stone-100 hover:bg-stone-200/80 border border-stone-200/80 transition-colors text-left w-full cursor-pointer overflow-hidden"
+              className="flex items-center h-10 w-full rounded-xl bg-stone-100 hover:bg-stone-200/80 border border-stone-200/80 transition-colors text-left cursor-pointer overflow-hidden"
               title="Profil Petani Utama"
             >
-              <div className="w-7 h-7 rounded-lg bg-emerald-950 text-emerald-300 font-medium text-[11px] flex items-center justify-center shrink-0 shadow-2xs">
-                PU
+              <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-emerald-700 text-white font-medium text-[11px] flex items-center justify-center shadow-2xs">
+                  PU
+                </div>
               </div>
               <div
-                className={`overflow-hidden transition-all duration-300 ease-out flex flex-col justify-center min-w-0 ${
-                  isOpen ? "opacity-100 max-w-[160px] ml-2.5" : "opacity-0 max-w-0 ml-0 pointer-events-none"
+                className={`overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)] flex flex-col justify-center min-w-0 ${
+                  isOpen
+                    ? "opacity-100 max-w-[160px] ml-1"
+                    : "opacity-0 max-w-0 ml-0 pointer-events-none"
                 }`}
               >
                 <span className="text-xs font-medium text-stone-900 block truncate whitespace-nowrap">
@@ -258,8 +247,8 @@ export default function Sidebar({
       {/* Desktop Light Botanical Integrated Rail with Centered Border Toggle */}
       <div className="relative hidden md:flex h-full shrink-0 print:hidden no-print">
         <aside
-          className={`flex flex-col h-full border-r border-stone-200/80 select-none shrink-0 transition-all duration-300 ease-out will-change-[width] overflow-hidden ${
-            isOpen ? "w-60" : "w-[68px]"
+          className={`flex flex-col h-full border-r border-stone-200/80 select-none shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.2,0,0,1)] will-change-[width] overflow-hidden ${
+            isOpen ? "w-60" : "w-16"
           }`}
         >
           {sidebarContent}
@@ -269,7 +258,7 @@ export default function Sidebar({
         <button
           type="button"
           onClick={onToggle}
-          className="absolute top-1/2 -translate-y-1/2 -right-3 z-40 w-6 h-6 rounded-full bg-white border border-stone-300 shadow-md hover:bg-stone-50 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-transform duration-200 cursor-pointer hover:scale-110"
+          className="absolute top-1/2 -translate-y-1/2 -right-3 z-40 w-6 h-6 rounded-full bg-white border border-stone-300 shadow-md hover:bg-stone-50 text-stone-600 hover:text-stone-900 flex items-center justify-center transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
           title={isOpen ? "Tutup Sidebar" : "Buka Sidebar"}
           aria-label={isOpen ? "Tutup Sidebar" : "Buka Sidebar"}
         >

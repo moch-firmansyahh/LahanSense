@@ -309,10 +309,7 @@ export default function PetaFullPage() {
               <div>
                 <h2 className="text-xs font-medium text-stone-900 tracking-tight">Konsol Spasial Satelit</h2>
                 <div className="flex items-center gap-1.5 text-[10px] text-stone-500 font-normal mt-0.5">
-                  <span className="flex h-1.5 w-1.5 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-600"></span>
-                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
                   <span className="text-emerald-700 font-medium">Sentinel-2B</span>
                   <span>·</span>
                   <span>10m Orbit 124</span>

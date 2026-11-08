@@ -1,8 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import BottomNav from "@/components/layout/BottomNav";
+
+// In-memory persistent state so the sidebar stays open across client-side page transitions
+let cachedSidebarOpen = false;
+let hasInitializedStorage = false;
+const listeners = new Set<(open: boolean) => void>();
+
+function setGlobalSidebarOpen(valueOrUpdater: boolean | ((prev: boolean) => boolean)) {
+  const next = typeof valueOrUpdater === "function" ? valueOrUpdater(cachedSidebarOpen) : valueOrUpdater;
+  cachedSidebarOpen = next;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem("lahansense_sidebar_open", String(next));
+    } catch {}
+  }
+  listeners.forEach((listener) => listener(next));
+}
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -11,14 +27,33 @@ interface AppShellProps {
 }
 
 export default function AppShell({ children, fullHeight = false }: AppShellProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(cachedSidebarOpen);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  useEffect(() => {
+    if (!hasInitializedStorage && typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("lahansense_sidebar_open");
+        if (saved !== null) {
+          cachedSidebarOpen = saved === "true";
+        }
+      } catch {}
+      hasInitializedStorage = true;
+    }
+    setIsSidebarOpen(cachedSidebarOpen);
+
+    const onUpdate = (val: boolean) => setIsSidebarOpen(val);
+    listeners.add(onUpdate);
+    return () => {
+      listeners.delete(onUpdate);
+    };
+  }, []);
 
   function handleToggleSidebar() {
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       setIsMobileOpen((v) => !v);
     } else {
-      setIsSidebarOpen((prev) => !prev);
+      setGlobalSidebarOpen((prev) => !prev);
     }
   }
 

@@ -771,7 +771,7 @@ export default function LahanListPage() {
                           <span
                             className={`w-2 h-2 rounded-full ${
                               isKritis
-                                ? "bg-rose-400 animate-pulse"
+                                ? "bg-rose-400"
                                 : isWaspada
                                 ? "bg-amber-400"
                                 : "bg-emerald-400"

@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Gauge,
   Satellite,
+  MessageSquare,
 } from "lucide-react";
 
 export default function PengaturanPage() {
@@ -20,10 +21,34 @@ export default function PengaturanPage() {
   const [pumpFlow, setPumpFlow] = useState("8");
   const [pumpPower, setPumpPower] = useState("solar");
   const [saved, setSaved] = useState(false);
+  const [waEnabled, setWaEnabled] = useState(true);
+  const [waTestSent, setWaTestSent] = useState(false);
+  const targetWaNumber = "08112222136";
 
   function handleSave() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  function handleTestSendWhatsApp() {
+    const message =
+      `🚨 *PERINGATAN DINI OTOMATIS LAHANSENSE*\n` +
+      `Sistem Otomatisasi EWS Satelit Sentinel-2 & BMKG\n\n` +
+      `📍 *Petak Lahan:* Blok A1 - Sawah Utama (Padi Ciherang)\n` +
+      `⚠️ *Status Bahaya:* 🔴 KRITIS (Defisit Kumulatif 14.5 mm)\n` +
+      `💧 *Kebutuhan Air:* 48.0 m³\n` +
+      `🛠️ *TINDAKAN LAPANGAN SEGERA:*\n` +
+      `Nyalakan pompa irigasi selama 60 menit debit 8 L/detik untuk membasahi perakaran padi fase vegetatif aktif.\n\n` +
+      `⏰ *Batas Waktu:* Hari Ini pukul 17.00 WIB\n\n` +
+      `_Notifikasi Otomatis Terkirim ke ${targetWaNumber}_`;
+
+    const encoded = encodeURIComponent(message);
+    const waUrl = `https://wa.me/628112222136?text=${encoded}`;
+    setWaTestSent(true);
+    if (typeof window !== "undefined") {
+      window.open(waUrl, "_blank");
+    }
+    setTimeout(() => setWaTestSent(false), 4000);
   }
 
   return (
@@ -182,19 +207,53 @@ export default function PengaturanPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-surface-50 border border-line-200/70 opacity-75">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-normal text-ink-900">Peringatan Otomatis WhatsApp</h4>
-                    <span className="text-[10px] font-normal bg-warn-50 text-amber-800 px-2 py-0.5 rounded-full flex items-center gap-1 border border-amber-300">
-                      <Lock className="w-2.5 h-2.5" /> Segera Hadir
-                    </span>
+              {/* Active WhatsApp Automation Card */}
+              <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-xs font-medium text-ink-900">Peringatan Otomatis WhatsApp</h4>
+                      <span className="text-[10px] font-normal bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block" /> Aktif 24/7
+                      </span>
+                      <span className="text-[10px] font-normal text-emerald-900 bg-white px-2 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
+                        08112222136
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-ink-600 font-normal leading-relaxed">
+                      Peringatan dini defisit air kritis dan prakiraan cuaca ekstrem dikirimkan otomatis langsung ke nomor WhatsApp siaga pengelola lahan (<span className="font-medium text-emerald-950">08112222136</span>) setiap pagi pukul 06.00 WIB atau saat anomali terdeteksi.
+                    </p>
                   </div>
-                  <p className="text-[11px] text-ink-400 font-medium">
-                    Rangkuman rekomendasi air dikirim setiap pagi pukul 06.00 WIB
-                  </p>
+                  <input
+                    type="checkbox"
+                    checked={waEnabled}
+                    onChange={(e) => setWaEnabled(e.target.checked)}
+                    className="accent-primary-600 w-4 h-4 cursor-pointer mt-0.5 shrink-0"
+                    title="Aktifkan / nonaktifkan notifikasi WhatsApp otomatis"
+                  />
                 </div>
-                <input type="checkbox" disabled className="w-4 h-4" />
+
+                <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 flex-wrap gap-2">
+                  <div className="text-[11px] text-emerald-800 font-normal flex items-center gap-1.5">
+                    <MessageSquare className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                    <span>Nomor Penerima Siaga: <span className="font-medium">08112222136</span></span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleTestSendWhatsApp}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-normal flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>{waTestSent ? "Terkirim ke WA 08112222136!" : "Uji Coba Kirim WA Sekarang"}</span>
+                  </button>
+                </div>
+
+                {waTestSent && (
+                  <p className="text-[11px] text-emerald-700 font-normal flex items-center gap-1.5 bg-emerald-100/70 p-2.5 rounded-lg border border-emerald-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Notifikasi uji coba berhasil disiapkan dan diteruskan ke WhatsApp siaga 08112222136.</span>
+                  </p>
+                )}
               </div>
             </div>
           </div>

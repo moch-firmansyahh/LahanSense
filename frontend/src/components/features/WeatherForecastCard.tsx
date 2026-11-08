@@ -70,7 +70,7 @@ export default function WeatherForecastCard({
       <div className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-50/60 to-surface-50 border border-line-200/50 mb-3.5">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-xl bg-amber-100/70 flex items-center justify-center shrink-0">
-            <CloudSun className="w-7 h-7 text-amber-600 animate-pulse" />
+            <CloudSun className="w-7 h-7 text-amber-600" />
           </div>
           <div>
             <div className="flex items-baseline gap-1">

@@ -114,7 +114,7 @@ export default function Topbar({
         <Badge variant="secondary" className="hidden lg:flex items-center gap-1.5 py-1 px-3 bg-white border-line-200 text-ink-700 shadow-2xs font-medium">
           <Satellite className="w-3.5 h-3.5 text-primary-600" aria-hidden="true" />
           <span>Sentinel-2 L2A</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-0.5" />
         </Badge>
 
         <DropdownMenu>

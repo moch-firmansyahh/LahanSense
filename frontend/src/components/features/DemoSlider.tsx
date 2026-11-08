@@ -103,7 +103,7 @@ export default function DemoSlider({
               style={{ left: `${((r + 7) / 14) * 94}%` }}
               title="Prakiraan Hujan"
             >
-              <Droplets className="w-3 h-3 text-water-600 fill-water-600 animate-bounce" />
+              <Droplets className="w-3 h-3 text-water-600 fill-water-600" />
             </div>
           ))}
         </div>

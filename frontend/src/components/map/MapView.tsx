@@ -32,6 +32,8 @@ import {
   ExternalLink,
   Check,
   Calendar,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -93,6 +95,7 @@ export default function MapView({
   const [ready, setReady] = useState(false);
   const [activeLayerMode, setActiveLayerMode] = useState<"satelit" | "ndvi" | "osm">("satelit");
   const [showInspector, setShowInspector] = useState(true);
+  const [mobileExpanded, setMobileExpanded] = useState(false);
   const [dayOffset, setDayOffset] = useState<number>(0);
   const [soilFeel, setSoilFeel] = useState<"kering" | "cukup" | "basah">("cukup");
   const [irrigationLogged, setIrrigationLogged] = useState(false);
@@ -519,45 +522,48 @@ export default function MapView({
       <div ref={containerRef} className="absolute inset-0 w-full h-full" />
 
       {/* TOP-RIGHT CONTROLS: Layer Mode Switcher + Reset View Docked Together */}
-      <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-2 pointer-events-auto">
+      <div className="absolute top-3.5 right-3.5 z-20 flex items-center gap-1.5 sm:gap-2 pointer-events-auto max-w-[calc(100%-1.5rem)]">
         {/* Layer Mode Switcher Pill */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-white/95 backdrop-blur-md shadow-md border border-stone-200/90">
+        <div className="flex items-center gap-0.5 sm:gap-1 p-1 rounded-xl bg-white/95 backdrop-blur-md shadow-md border border-stone-200/90 overflow-hidden">
           <button
             type="button"
             onClick={() => setActiveLayerMode("satelit")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
               activeLayerMode === "satelit"
                 ? "bg-emerald-950 text-white shadow-2xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
             }`}
           >
-            <Layers className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Satelit Sentinel-2</span>
+            <Layers className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="hidden sm:inline">Satelit Sentinel-2</span>
+            <span className="sm:hidden text-[11px]">Satelit</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveLayerMode("ndvi")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
               activeLayerMode === "ndvi"
                 ? "bg-emerald-950 text-white shadow-2xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
             }`}
           >
-            <Sprout className="w-3.5 h-3.5 text-lime-400" />
-            <span>AgriWatch NDVI</span>
+            <Sprout className="w-3.5 h-3.5 text-lime-400 shrink-0" />
+            <span className="hidden sm:inline">AgriWatch NDVI</span>
+            <span className="sm:hidden text-[11px]">NDVI</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveLayerMode("osm")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
               activeLayerMode === "osm"
                 ? "bg-emerald-950 text-white shadow-2xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
             }`}
           >
-            <span>Peta Jalan</span>
+            <span className="hidden sm:inline">Peta Jalan</span>
+            <span className="sm:hidden text-[11px]">Jalan</span>
           </button>
         </div>
 
@@ -623,12 +629,12 @@ export default function MapView({
 
       {/* BOTTOM FLOATING INSPECTOR: AgriWatch & WaterCast Intelligence Hub (Answering Proposal PDF) */}
       {showInspector && selectedPlot && (
-        <div className="absolute bottom-3 left-3 right-3 z-30 pointer-events-auto animate-in slide-in-from-bottom-2 duration-300">
-          <div className="rounded-2xl bg-white/95 backdrop-blur-md p-3.5 sm:p-4 shadow-xl border border-stone-200/90 flex flex-col gap-3">
+        <div className="absolute bottom-2.5 sm:bottom-3 left-2.5 sm:left-3 right-2.5 sm:right-3 z-30 pointer-events-auto animate-in slide-in-from-bottom-2 duration-300 max-h-[75%] flex flex-col">
+          <div className="rounded-2xl bg-white/95 backdrop-blur-md p-3 sm:p-4 shadow-xl border border-stone-200/90 flex flex-col gap-2.5 sm:gap-3 overflow-hidden">
             {/* Row 1: Header + Status + Close */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl overflow-hidden bg-white border border-stone-200/90 flex items-center justify-center shrink-0 shadow-2xs p-0.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden bg-white border border-stone-200/90 flex items-center justify-center shrink-0 shadow-2xs p-0.5">
                   <Image
                     src="/logo.png"
                     alt="Logo LahanSense"
@@ -637,13 +643,13 @@ export default function MapView({
                     className="w-full h-full object-contain rounded-lg"
                   />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-stone-900 tracking-tight">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="text-xs sm:text-sm font-medium text-stone-900 tracking-tight truncate">
                       {selectedPlot.name.replace(" (demo)", "")}
                     </h3>
                     <span
-                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider ${
+                      className={`px-2 py-0.2 sm:px-2.5 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-medium uppercase tracking-wider shrink-0 ${
                         currentMeta.status === "kritis"
                           ? "bg-rose-100 text-rose-800"
                           : currentMeta.status === "waspada"
@@ -658,18 +664,22 @@ export default function MapView({
                         : "Aman"}
                     </span>
                   </div>
-                  <p className="text-[11px] text-stone-500 font-normal">
-                    {selectedPlot.crop.toUpperCase()} · Luas {selectedPlot.area_ha.toFixed(2)} ha · {currentMeta.growthStage}
+                  <p className="text-[10px] sm:text-[11px] text-stone-500 font-normal truncate">
+                    {selectedPlot.crop.toUpperCase()} · {selectedPlot.area_ha.toFixed(2)} ha
+                    <span className="hidden sm:inline"> · {currentMeta.growthStage}</span>
+                    <span className="sm:hidden font-medium text-blue-700 ml-1.5">
+                      · {currentMeta.volumeM3.toFixed(0)} m³
+                    </span>
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={handleLogIrrigation}
                   disabled={irrigationLogged}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs ${
+                  className={`px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1 sm:gap-1.5 transition-all cursor-pointer shadow-2xs ${
                     irrigationLogged
                       ? "bg-emerald-600 text-white"
                       : "bg-emerald-950 hover:bg-emerald-900 text-white"
@@ -684,22 +694,38 @@ export default function MapView({
                   ) : (
                     <>
                       <Droplets className="w-3.5 h-3.5 text-blue-300" />
-                      <span>Sudah Diairi</span>
+                      <span className="hidden sm:inline">Sudah Diairi</span>
                     </>
                   )}
                 </button>
 
                 <Link
                   href={`/lahan/${selectedPlot.id}`}
-                  className="px-2.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium flex items-center gap-1.5 transition-colors"
+                  className="hidden sm:flex px-2.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium items-center gap-1.5 transition-colors"
                 >
                   <span>Detail</span>
                   <ExternalLink className="w-3 h-3 text-stone-400" />
                 </Link>
+
+                {/* Mobile Expand / Collapse Toggle Button */}
+                <button
+                  type="button"
+                  onClick={() => setMobileExpanded((v) => !v)}
+                  className="sm:hidden p-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium flex items-center justify-center transition-colors cursor-pointer"
+                  title={mobileExpanded ? "Sembunyikan Rincian" : "Tampilkan Rincian"}
+                  aria-label={mobileExpanded ? "Sembunyikan Rincian" : "Tampilkan Rincian"}
+                >
+                  {mobileExpanded ? (
+                    <ChevronDown className="w-4 h-4 text-stone-600" />
+                  ) : (
+                    <ChevronUp className="w-4 h-4 text-stone-600" />
+                  )}
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowInspector(false)}
-                  className="w-7 h-7 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition-colors"
+                  className="w-7 h-7 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 flex items-center justify-center transition-colors cursor-pointer"
                   title="Tutup Ringkasan"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -707,105 +733,125 @@ export default function MapView({
               </div>
             </div>
 
-            {/* Row 2: WaterCast Grid (Metode Baku FAO-56 sesuai Section 4.2 PDF) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-stone-200/60">
-              <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
-                <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
-                  Rekomendasi Air
-                </span>
-                <span className="text-base sm:text-lg font-medium text-blue-700 tabular-nums">
-                  {currentMeta.volumeM3.toFixed(0)} m³
-                </span>
-                <span className="text-[10px] text-stone-500 font-normal">
-                  ≈ {currentMeta.deficitMm.toFixed(1)} mm defisit
-                </span>
-              </div>
+            {/* EXPANDABLE BODY: Row 2, Row 3, Row 4 (Always visible on desktop sm:flex, toggled on mobile) */}
+            <div className={`${mobileExpanded ? "flex flex-col gap-2.5 overflow-y-auto max-h-[50vh] pt-1" : "hidden sm:flex sm:flex-col sm:gap-3 pt-1"}`}>
+              {/* Row 2: WaterCast Grid (Metode Baku FAO-56 sesuai Section 4.2 PDF) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-stone-200/60">
+                <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
+                  <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
+                    Rekomendasi Air
+                  </span>
+                  <span className="text-base sm:text-lg font-medium text-blue-700 tabular-nums">
+                    {currentMeta.volumeM3.toFixed(0)} m³
+                  </span>
+                  <span className="text-[10px] text-stone-500 font-normal">
+                    ≈ {currentMeta.deficitMm.toFixed(1)} mm defisit
+                  </span>
+                </div>
 
-              <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
-                <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
-                  Durasi Pompa
-                </span>
-                <span className="text-base sm:text-lg font-medium text-stone-800 tabular-nums">
-                  {currentMeta.pumpMinutes} Menit
-                </span>
-                <span className="text-[10px] text-stone-500 font-normal">
-                  Debit 8 Liter/detik
-                </span>
-              </div>
+                <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
+                  <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
+                    Durasi Pompa
+                  </span>
+                  <span className="text-base sm:text-lg font-medium text-stone-800 tabular-nums">
+                    {currentMeta.pumpMinutes} Menit
+                  </span>
+                  <span className="text-[10px] text-stone-500 font-normal">
+                    Debit 8 Liter/detik
+                  </span>
+                </div>
 
-              <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
-                <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
-                  AgriWatch NDVI
-                </span>
-                <span className="text-base sm:text-lg font-medium text-emerald-800 tabular-nums">
-                  {currentMeta.ndvi.toFixed(2)}
-                </span>
-                <span className="text-[10px] text-emerald-700 font-normal">
-                  Tajuk Sehat (Sentinel-2)
-                </span>
-              </div>
+                <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
+                  <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
+                    AgriWatch NDVI
+                  </span>
+                  <span className="text-base sm:text-lg font-medium text-emerald-800 tabular-nums">
+                    {currentMeta.ndvi.toFixed(2)}
+                  </span>
+                  <span className="text-[10px] text-emerald-700 font-normal">
+                    Tajuk Sehat (Sentinel-2)
+                  </span>
+                </div>
 
-              <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
-                <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
-                  Kebutuhan ETc
-                </span>
-                <span className="text-base sm:text-lg font-medium text-stone-800 tabular-nums">
-                  {currentMeta.etc.toFixed(1)} mm
-                </span>
-                <span className="text-[10px] text-stone-500 font-normal">
-                  Kc {currentMeta.kc.toFixed(2)} × ET₀ {currentMeta.et0.toFixed(1)}
-                </span>
-              </div>
-            </div>
-
-            {/* Row 3: Ground Truth Kalibrasi Petani (Section 4.2 & 5.6 PDF - No Collision) */}
-            <div className="flex items-center justify-between gap-2 pt-2 border-t border-stone-200/60">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-medium text-stone-600 shrink-0">
-                  Kondisi Tanah:
-                </span>
-                <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg border border-stone-200/80">
-                  {(["kering", "cukup", "basah"] as const).map((feel) => (
-                    <button
-                      key={feel}
-                      type="button"
-                      onClick={() => setSoilFeel(feel)}
-                      className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium capitalize transition-all ${
-                        soilFeel === feel
-                          ? "bg-white text-stone-900 shadow-2xs"
-                          : "text-stone-500 hover:text-stone-900"
-                      }`}
-                    >
-                      {feel}
-                    </button>
-                  ))}
+                <div className="p-2 rounded-xl bg-stone-50/80 border border-stone-200/60 flex flex-col">
+                  <span className="text-[9px] font-medium uppercase tracking-wider text-stone-400">
+                    Kebutuhan ETc
+                  </span>
+                  <span className="text-base sm:text-lg font-medium text-stone-800 tabular-nums">
+                    {currentMeta.etc.toFixed(1)} mm
+                  </span>
+                  <span className="text-[10px] text-stone-500 font-normal">
+                    Kc {currentMeta.kc.toFixed(2)} × ET₀ {currentMeta.et0.toFixed(1)}
+                  </span>
                 </div>
               </div>
-              <span className="text-[10px] text-stone-400 font-normal hidden sm:inline">Kalibrasi Lapangan</span>
-            </div>
 
-            {/* Row 4: Skenario Waktu Simulator (Section 5.5 Poin 4 PDF Proposal) */}
-            <div className="pt-2 border-t border-stone-200/60 flex items-center gap-3">
-              <div className="flex items-center gap-1.5 text-stone-500 shrink-0">
-                <Calendar className="w-3.5 h-3.5 text-emerald-700" />
-                <span className="text-[10px] font-medium uppercase tracking-wider text-stone-500">
-                  Proyeksi Waktu:
+              {/* Row 3: Ground Truth Kalibrasi Petani (Section 4.2 & 5.6 PDF - No Collision) */}
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-stone-200/60">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-medium text-stone-600 shrink-0">
+                    Kondisi Tanah:
+                  </span>
+                  <div className="flex items-center gap-1 bg-stone-100 p-0.5 rounded-lg border border-stone-200/80">
+                    {(["kering", "cukup", "basah"] as const).map((feel) => (
+                      <button
+                        key={feel}
+                        type="button"
+                        onClick={() => setSoilFeel(feel)}
+                        className={`px-2.5 py-0.5 rounded-md text-[10px] font-medium capitalize transition-all ${
+                          soilFeel === feel
+                            ? "bg-white text-stone-900 shadow-2xs"
+                            : "text-stone-500 hover:text-stone-900"
+                        }`}
+                      >
+                        {feel}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <span className="text-[10px] text-stone-400 font-normal hidden sm:inline">Kalibrasi Lapangan</span>
+              </div>
+
+              {/* Row 4: Skenario Waktu Simulator (Section 5.5 Poin 4 PDF Proposal) */}
+              <div className="pt-2 border-t border-stone-200/60 flex items-center gap-3">
+                <div className="flex items-center gap-1.5 text-stone-500 shrink-0">
+                  <Calendar className="w-3.5 h-3.5 text-emerald-700" />
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-stone-500">
+                    Proyeksi Waktu:
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={7}
+                  value={dayOffset}
+                  onChange={(e) => setDayOffset(Number(e.target.value))}
+                  className="flex-1 accent-emerald-700 cursor-pointer h-1.5 bg-stone-200 rounded-lg"
+                />
+                <span className="text-[11px] font-medium text-stone-800 tabular-nums shrink-0">
+                  {dayOffset === 0 ? "Hari Ini (H-0)" : `+${dayOffset} Hari (H+${dayOffset})`}
                 </span>
               </div>
-              <input
-                type="range"
-                min={0}
-                max={7}
-                value={dayOffset}
-                onChange={(e) => setDayOffset(Number(e.target.value))}
-                className="flex-1 accent-emerald-700 cursor-pointer h-1.5 bg-stone-200 rounded-lg"
-              />
-              <span className="text-[11px] font-medium text-stone-800 tabular-nums shrink-0">
-                {dayOffset === 0 ? "Hari Ini (H-0)" : `+${dayOffset} Hari (H+${dayOffset})`}
-              </span>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Reopen Pill (When Inspector is closed) */}
+      {!showInspector && selectedPlot && (
+        <button
+          type="button"
+          onClick={() => {
+            setShowInspector(true);
+            setMobileExpanded(false);
+          }}
+          className="absolute bottom-3 left-3 z-30 pointer-events-auto flex items-center gap-2 px-3 py-2 rounded-xl bg-white/95 backdrop-blur-md shadow-lg border border-stone-200/90 text-xs font-medium text-stone-800 hover:bg-white cursor-pointer hover:scale-105 transition-all"
+        >
+          <Sprout className="w-4 h-4 text-emerald-700" />
+          <span>{selectedPlot.name.replace(" (demo)", "")}</span>
+          <span className="text-blue-700 font-medium">{currentMeta.volumeM3.toFixed(0)} m³</span>
+          <ChevronUp className="w-3.5 h-3.5 text-stone-400" />
+        </button>
       )}
     </div>
   );
