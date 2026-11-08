@@ -1,26 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,700&display=swap');
 @import "tailwindcss";
+@config "../../tailwind.config.ts";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-primary-50: #F0FDF4;
+  --color-primary-100: #DCFCE7;
+  --color-primary-600: #16A34A;
+  --color-primary-700: #15803D;
+
+  --color-forest-800: #166534;
+  --color-forest-900: #14532D;
+
+  --color-lime-400: #A3E635;
+
+  --color-water-50: #EFF6FF;
+  --color-water-600: #2563EB;
+
+  --color-warn-50: #FFFBEB;
+  --color-warn-500: #F59E0B;
+
+  --color-danger-50: #FEF2F2;
+  --color-danger-600: #DC2626;
+
+  --color-ink-900: #0F1F17;
+  --color-ink-600: #4B5B52;
+  --color-ink-400: #8A988F;
+
+  --color-line-200: #E3EBE6;
+
+  --color-surface-0: #FFFFFF;
+  --color-surface-50: #F6FAF7;
+
+  /* shadcn UI semantic mapping */
+  --color-background: #F6FAF7;
+  --color-foreground: #0F1F17;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F1F17;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #0F1F17;
+  --color-primary: #16A34A;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #F0FDF4;
+  --color-secondary-foreground: #14532D;
+  --color-muted: #F1F5F2;
+  --color-muted-foreground: #4B5B52;
+  --color-accent: #DCFCE7;
+  --color-accent-foreground: #14532D;
+  --color-destructive: #DC2626;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #E3EBE6;
+  --color-input: #E3EBE6;
+  --color-ring: #16A34A;
+
+  --radius-card: 24px;
+  --radius-frame: 32px;
+  --radius-input: 16px;
+  --radius-pill: 9999px;
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+
+  --shadow-card: 0 8px 24px -8px rgba(22,163,74,0.18), 0 2px 6px rgba(15,31,23,0.04);
+  --shadow-float: 0 16px 40px -12px rgba(20,83,45,0.35);
+  --shadow-focus: 0 0 0 3px rgba(22,163,74,0.35);
+
+  --font-sans: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Montserrat', system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  body {
+    background: #E8ECE8;
+    color: #0F1F17;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+    font-weight: 500;
+  }
+
+  b, strong {
+    font-weight: 500;
+  }
+
+  .font-serif {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .font-sans {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  /* Anti-slop R-39 & R-32: Explicit cursor affordance and keyboard focus */
+  a[href],
+  button,
+  summary,
+  select,
+  label[for],
+  [role="button"],
+  [role="tab"] {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 2px solid #16A34A;
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.glass-dark {
+  background: rgba(20, 83, 45, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E3EBE6;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8A988F;
+}
+
+/* ==========================================================================
+   OFFICIAL PRINT TO PDF ENGINE (NO COLLISION, CRISP A4 FORMAT)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 16mm;
+  }
+
+  /* Unconstrain top-level viewport containers so pagination flows across pages */
+  html,
+  body {
+    background: #FFFFFF !important;
+    color: #1C1917 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Unconstrain AppShell and page root wrappers */
+  #__next,
+  main,
+  [data-app-shell],
+  .app-shell-root,
+  .app-shell-main {
+    background: #FFFFFF !important;
+    color: #1C1917 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  /* Hide screen chrome & controls */
+  aside,
+  nav,
+  header,
+  footer,
+  button,
+  input,
+  select,
+  textarea,
+  .no-print,
+  [data-no-print="true"] {
+    display: none !important;
+  }
+
+  /* Keep flex and grid layouts intact without flattening */
+  .flex {
+    display: flex !important;
+  }
+
+  .grid {
+    display: grid !important;
+  }
+
+  /* Prevent awkward page break cuts inside cards and table rows */
+  .print-break-avoid,
+  tr,
+  figure {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Table styling */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: auto !important;
+    font-size: 9pt !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  th {
+    background-color: #F5F5F4 !important;
+    color: #1C1917 !important;
+    border: 1px solid #D6D3D1 !important;
+    padding: 6px 8px !important;
+    font-weight: 500 !important;
+  }
+
+  td {
+    border: 1px solid #E7E5E4 !important;
+    padding: 6px 8px !important;
+    color: #292524 !important;
+  }
+
+  /* Neutralize all box shadows and glow effects */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+

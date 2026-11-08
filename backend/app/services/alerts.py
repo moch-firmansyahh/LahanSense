@@ -1,4 +1,5 @@
 from datetime import date
+from urllib.parse import quote
 
 from app.services.water_balance import compute_day
 
@@ -55,3 +56,46 @@ def build_alerts(forecast: list[dict]) -> list[dict]:
                 }
             )
     return alerts
+
+
+def format_whatsapp_alert(
+    plot_name: str,
+    crop: str,
+    alert_type: str,
+    severity: str,
+    message: str,
+    suggested_action: str,
+    phone: str = "08112222136",
+) -> dict:
+    """Format and generate an automated WhatsApp Early Warning message and URL to 08112222136."""
+    clean_phone = phone.strip().replace(" ", "").replace("-", "")
+    if clean_phone.startswith("0"):
+        wa_phone = "62" + clean_phone[1:]
+    elif clean_phone.startswith("+62"):
+        wa_phone = clean_phone[1:]
+    else:
+        wa_phone = clean_phone
+
+    severity_icon = "🔴 KRITIS" if severity.lower() == "kritis" else ("🟡 WASPADA" if severity.lower() == "waspada" else "🟢 NORMAL")
+
+    text = (
+        f"🚨 *PERINGATAN DINI OTOMATIS LAHANSENSE*\n"
+        f"Sistem Otomatisasi EWS Satelit Sentinel-2 & BMKG\n\n"
+        f"📍 *Petak Lahan:* {plot_name}\n"
+        f"🌱 *Komoditas:* {crop.capitalize()}\n"
+        f"⚠️ *Status Bahaya:* {severity_icon}\n"
+        f"📋 *Peringatan:* {message}\n"
+        f"🛠️ *TINDAKAN LAPANGAN SEGERA:*\n{suggested_action}\n\n"
+        f"_Notifikasi Otomatis Terkirim ke {phone}_"
+    )
+
+    wa_url = f"https://wa.me/{wa_phone}?text={quote(text)}"
+
+    return {
+        "target_phone": phone,
+        "wa_phone": wa_phone,
+        "message": text,
+        "wa_url": wa_url,
+        "status": "ready",
+    }
+

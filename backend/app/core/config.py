@@ -4,11 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=(".env", "backend/.env"), extra="ignore")
 
     app_env: str = "development"
     cors_origins: str = "http://localhost:3000"
-    database_url: str
+    database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/postgres"
     open_meteo_base_url: str = "https://api.open-meteo.com/v1"
     demo_mode: bool = True
 
